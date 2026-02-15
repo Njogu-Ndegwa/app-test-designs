@@ -1,0 +1,1654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BotGenie — Your AI Assistant on Telegram & WhatsApp</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* ===== RESET & BASE ===== */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #1a1a2e;
+            background: #ffffff;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+        img { max-width: 100%; }
+
+        /* ===== CSS VARIABLES ===== */
+        :root {
+            --primary: #6C3CE1;
+            --primary-dark: #5228c0;
+            --primary-light: #ede5fc;
+            --accent: #FF6B35;
+            --accent-light: #fff0e9;
+            --teal: #00D4AA;
+            --dark: #1a1a2e;
+            --gray-900: #2d2d44;
+            --gray-700: #555570;
+            --gray-500: #8888a0;
+            --gray-300: #c4c4d4;
+            --gray-100: #f0f0f8;
+            --white: #ffffff;
+            --gradient: linear-gradient(135deg, #6C3CE1 0%, #3B82F6 100%);
+            --gradient-warm: linear-gradient(135deg, #FF6B35 0%, #FF3CAC 100%);
+            --shadow-sm: 0 2px 8px rgba(108, 60, 225, 0.08);
+            --shadow-md: 0 8px 30px rgba(108, 60, 225, 0.12);
+            --shadow-lg: 0 20px 60px rgba(108, 60, 225, 0.15);
+            --radius: 16px;
+            --radius-sm: 10px;
+        }
+
+        /* ===== UTILITY ===== */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        .section { padding: 100px 0; }
+        .section-dark { background: var(--dark); color: var(--white); }
+        .section-light { background: var(--gray-100); }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--primary-light);
+            color: var(--primary);
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 8px 18px;
+            border-radius: 50px;
+        }
+        .section-title {
+            font-size: clamp(2rem, 4vw, 2.8rem);
+            font-weight: 800;
+            line-height: 1.2;
+            margin: 16px 0;
+        }
+        .section-sub {
+            font-size: 1.1rem;
+            color: var(--gray-500);
+            max-width: 600px;
+            line-height: 1.7;
+        }
+        .text-center { text-align: center; }
+        .mx-auto { margin-left: auto; margin-right: auto; }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 16px 32px;
+            border-radius: 14px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-primary {
+            background: var(--gradient);
+            color: var(--white);
+            box-shadow: 0 4px 20px rgba(108, 60, 225, 0.35);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(108, 60, 225, 0.45);
+        }
+        .btn-accent {
+            background: var(--gradient-warm);
+            color: var(--white);
+            box-shadow: 0 4px 20px rgba(255, 107, 53, 0.35);
+        }
+        .btn-accent:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 107, 53, 0.45);
+        }
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+        .btn-outline:hover {
+            background: var(--primary);
+            color: var(--white);
+        }
+        .btn-white {
+            background: var(--white);
+            color: var(--primary);
+        }
+        .btn-white:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        .btn-sm { padding: 12px 24px; font-size: 0.9rem; border-radius: 10px; }
+        .btn-lg { padding: 20px 40px; font-size: 1.1rem; border-radius: 16px; }
+
+        /* ===== NAV ===== */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 16px 0;
+            transition: all 0.3s ease;
+        }
+        .nav.scrolled {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            box-shadow: var(--shadow-sm);
+            padding: 12px 0;
+        }
+        .nav-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.4rem;
+            font-weight: 800;
+        }
+        .nav-logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 36px;
+        }
+        .nav-links a {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--gray-700);
+            transition: color 0.2s;
+        }
+        .nav-links a:hover { color: var(--primary); }
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .nav-login {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--gray-700);
+            padding: 10px 20px;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+        .nav-login:hover { background: var(--gray-100); }
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            flex-direction: column;
+            justify-content: center;
+            gap: 5px;
+        }
+        .mobile-toggle span {
+            display: block;
+            width: 100%;
+            height: 2.5px;
+            background: var(--dark);
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+
+        /* ===== HERO ===== */
+        .hero {
+            padding: 160px 0 100px;
+            background: linear-gradient(180deg, #f8f5ff 0%, #ffffff 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -200px;
+            right: -200px;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(108,60,225,0.08) 0%, transparent 70%);
+        }
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -100px;
+            left: -150px;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,107,53,0.06) 0%, transparent 70%);
+        }
+        .hero-inner {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+        .hero-content { max-width: 560px; }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--accent-light);
+            color: var(--accent);
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 8px 18px;
+            border-radius: 50px;
+            margin-bottom: 24px;
+            animation: fadeInUp 0.8s ease;
+        }
+        .hero-badge .pulse {
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            animation: fadeInUp 0.8s ease 0.1s both;
+        }
+        .hero h1 .highlight {
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero-desc {
+            font-size: 1.15rem;
+            color: var(--gray-700);
+            line-height: 1.8;
+            margin-bottom: 36px;
+            animation: fadeInUp 0.8s ease 0.2s both;
+        }
+        .hero-cta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.8s ease 0.3s both;
+        }
+        .hero-social-proof {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 40px;
+            animation: fadeInUp 0.8s ease 0.4s both;
+        }
+        .hero-avatars {
+            display: flex;
+        }
+        .hero-avatars .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 3px solid white;
+            margin-left: -10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: white;
+        }
+        .hero-avatars .avatar:first-child { margin-left: 0; }
+        .hero-social-text {
+            font-size: 0.9rem;
+            color: var(--gray-500);
+        }
+        .hero-social-text strong {
+            color: var(--dark);
+        }
+
+        /* Hero Visual (Phone Mockup) */
+        .hero-visual {
+            display: flex;
+            justify-content: center;
+            animation: fadeInUp 0.8s ease 0.2s both;
+        }
+        .phone-mockup {
+            width: 320px;
+            background: var(--dark);
+            border-radius: 36px;
+            padding: 12px;
+            box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255,255,255,0.1) inset;
+            transform: perspective(800px) rotateY(-8deg) rotateX(3deg);
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .phone-mockup:hover {
+            transform: perspective(800px) rotateY(-2deg) rotateX(1deg);
+        }
+        .phone-screen {
+            background: #1e1e34;
+            border-radius: 26px;
+            overflow: hidden;
+            height: 520px;
+            display: flex;
+            flex-direction: column;
+        }
+        .phone-header {
+            padding: 20px 16px 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(108,60,225,0.15);
+        }
+        .phone-header-avatar {
+            width: 38px;
+            height: 38px;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+        .phone-header-info h4 {
+            color: #fff;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        .phone-header-info span {
+            color: var(--teal);
+            font-size: 0.75rem;
+        }
+        .phone-chat {
+            flex: 1;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow: hidden;
+        }
+        .chat-msg {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 0.82rem;
+            line-height: 1.5;
+            animation: chatFadeIn 0.5s ease both;
+        }
+        .chat-msg.bot {
+            background: rgba(108,60,225,0.2);
+            color: #d4c5f9;
+            border-bottom-left-radius: 6px;
+            align-self: flex-start;
+        }
+        .chat-msg.user {
+            background: var(--primary);
+            color: white;
+            border-bottom-right-radius: 6px;
+            align-self: flex-end;
+        }
+        .chat-msg:nth-child(1) { animation-delay: 0.5s; }
+        .chat-msg:nth-child(2) { animation-delay: 1.2s; }
+        .chat-msg:nth-child(3) { animation-delay: 2s; }
+        .chat-msg:nth-child(4) { animation-delay: 2.8s; }
+        .chat-msg:nth-child(5) { animation-delay: 3.5s; }
+        .phone-input {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.05);
+        }
+        .phone-input-field {
+            flex: 1;
+            background: rgba(255,255,255,0.08);
+            border: none;
+            padding: 10px 14px;
+            border-radius: 20px;
+            color: #999;
+            font-size: 0.8rem;
+        }
+        .phone-input-send {
+            width: 36px;
+            height: 36px;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ===== LOGOS / TRUST ===== */
+        .trust-bar {
+            padding: 60px 0;
+            border-top: 1px solid var(--gray-100);
+            border-bottom: 1px solid var(--gray-100);
+        }
+        .trust-bar p {
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--gray-500);
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+        }
+        .trust-logos {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 50px;
+            flex-wrap: wrap;
+            opacity: 0.5;
+        }
+        .trust-logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--gray-500);
+        }
+
+        /* ===== HOW IT WORKS ===== */
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            margin-top: 60px;
+            position: relative;
+        }
+        .steps-grid::before {
+            content: '';
+            position: absolute;
+            top: 50px;
+            left: 15%;
+            right: 15%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-light), var(--primary), var(--primary-light));
+            z-index: 0;
+        }
+        .step-card {
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        .step-number {
+            width: 80px;
+            height: 80px;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin: 0 auto 24px;
+            position: relative;
+        }
+        .step-card:nth-child(1) .step-number {
+            background: linear-gradient(135deg, #6C3CE1 0%, #8B5CF6 100%);
+            color: white;
+        }
+        .step-card:nth-child(2) .step-number {
+            background: linear-gradient(135deg, #FF6B35 0%, #FF8C5C 100%);
+            color: white;
+        }
+        .step-card:nth-child(3) .step-number {
+            background: linear-gradient(135deg, #00D4AA 0%, #34E8C0 100%);
+            color: white;
+        }
+        .step-card h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .step-card p {
+            font-size: 0.95rem;
+            color: var(--gray-500);
+            line-height: 1.7;
+            max-width: 280px;
+            margin: 0 auto;
+        }
+
+        /* ===== FEATURES ===== */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 60px;
+        }
+        .feature-card {
+            background: var(--white);
+            border: 1px solid var(--gray-100);
+            border-radius: var(--radius);
+            padding: 36px 28px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .feature-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-md);
+            border-color: transparent;
+        }
+        .feature-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+        .feature-card:nth-child(1) .feature-icon { background: #ede5fc; }
+        .feature-card:nth-child(2) .feature-icon { background: #e0f7ef; }
+        .feature-card:nth-child(3) .feature-icon { background: #fff0e9; }
+        .feature-card:nth-child(4) .feature-icon { background: #e8f4fd; }
+        .feature-card:nth-child(5) .feature-icon { background: #fef3e2; }
+        .feature-card:nth-child(6) .feature-icon { background: #fce4ec; }
+        .feature-card h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .feature-card p {
+            font-size: 0.92rem;
+            color: var(--gray-500);
+            line-height: 1.7;
+        }
+
+        /* ===== PLATFORMS ===== */
+        .platforms-inner {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 60px;
+        }
+        .platform-card {
+            border-radius: var(--radius);
+            padding: 48px 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        .platform-card.telegram {
+            background: linear-gradient(135deg, #0088cc 0%, #00aaee 100%);
+            color: white;
+        }
+        .platform-card.whatsapp {
+            background: linear-gradient(135deg, #128C7E 0%, #25D366 100%);
+            color: white;
+            position: relative;
+        }
+        .platform-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        .platform-card h3 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+        .platform-card p {
+            font-size: 1rem;
+            opacity: 0.9;
+            line-height: 1.7;
+            margin-bottom: 24px;
+        }
+        .platform-card .btn {
+            border-radius: 12px;
+        }
+        .coming-soon-badge {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            background: rgba(255,255,255,0.25);
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            backdrop-filter: blur(10px);
+        }
+
+        /* ===== PRICING ===== */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 60px;
+            align-items: start;
+        }
+        .pricing-card {
+            background: var(--white);
+            border: 2px solid var(--gray-100);
+            border-radius: var(--radius);
+            padding: 40px 32px;
+            text-align: center;
+            transition: all 0.4s ease;
+            position: relative;
+        }
+        .pricing-card.popular {
+            border-color: var(--primary);
+            transform: scale(1.05);
+            box-shadow: var(--shadow-lg);
+        }
+        .pricing-card.popular::before {
+            content: 'Most Popular';
+            position: absolute;
+            top: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gradient);
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 6px 20px;
+            border-radius: 50px;
+        }
+        .pricing-card h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .pricing-card .price {
+            font-size: 3rem;
+            font-weight: 900;
+            margin: 16px 0;
+        }
+        .pricing-card .price span {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--gray-500);
+        }
+        .pricing-card .price-desc {
+            font-size: 0.9rem;
+            color: var(--gray-500);
+            margin-bottom: 28px;
+        }
+        .pricing-features {
+            text-align: left;
+            margin-bottom: 32px;
+        }
+        .pricing-features li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            font-size: 0.92rem;
+            color: var(--gray-700);
+            border-bottom: 1px solid var(--gray-100);
+        }
+        .pricing-features li:last-child { border-bottom: none; }
+        .pricing-features .check {
+            color: var(--teal);
+            font-weight: 700;
+        }
+        .pricing-card .btn { width: 100%; justify-content: center; }
+
+        /* ===== TESTIMONIALS ===== */
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 60px;
+        }
+        .testimonial-card {
+            background: var(--white);
+            border: 1px solid var(--gray-100);
+            border-radius: var(--radius);
+            padding: 32px 28px;
+        }
+        .testimonial-stars {
+            color: #FFC107;
+            font-size: 1rem;
+            margin-bottom: 16px;
+            letter-spacing: 2px;
+        }
+        .testimonial-card blockquote {
+            font-size: 0.95rem;
+            color: var(--gray-700);
+            line-height: 1.7;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .testimonial-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            font-size: 0.9rem;
+        }
+        .testimonial-author h4 {
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+        .testimonial-author span {
+            font-size: 0.8rem;
+            color: var(--gray-500);
+        }
+
+        /* ===== FAQ ===== */
+        .faq-list {
+            max-width: 720px;
+            margin: 60px auto 0;
+        }
+        .faq-item {
+            border-bottom: 1px solid var(--gray-100);
+        }
+        .faq-question {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px 0;
+            cursor: pointer;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--dark);
+            transition: color 0.2s;
+            user-select: none;
+        }
+        .faq-question:hover { color: var(--primary); }
+        .faq-toggle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--gray-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+        .faq-item.active .faq-toggle {
+            background: var(--primary);
+            color: white;
+            transform: rotate(45deg);
+        }
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.4s ease;
+        }
+        .faq-item.active .faq-answer {
+            max-height: 200px;
+            padding-bottom: 24px;
+        }
+        .faq-answer p {
+            font-size: 0.95rem;
+            color: var(--gray-500);
+            line-height: 1.7;
+        }
+
+        /* ===== CTA SECTION ===== */
+        .cta-section {
+            padding: 100px 0;
+            background: var(--gradient);
+            position: relative;
+            overflow: hidden;
+        }
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+        }
+        .cta-section::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -10%;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.03);
+        }
+        .cta-inner {
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+        .cta-inner h2 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 900;
+            color: white;
+            margin-bottom: 16px;
+        }
+        .cta-inner p {
+            font-size: 1.15rem;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 36px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: var(--dark);
+            color: rgba(255,255,255,0.7);
+            padding: 60px 0 30px;
+        }
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        .footer-brand h3 {
+            color: white;
+            font-size: 1.3rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .footer-brand p {
+            font-size: 0.9rem;
+            line-height: 1.7;
+            max-width: 300px;
+        }
+        .footer-col h4 {
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        .footer-col a {
+            display: block;
+            font-size: 0.9rem;
+            padding: 6px 0;
+            transition: color 0.2s;
+        }
+        .footer-col a:hover { color: var(--primary); }
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.08);
+            padding-top: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+        .footer-socials {
+            display: flex;
+            gap: 16px;
+        }
+        .footer-socials a {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .footer-socials a:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.5); }
+        }
+        @keyframes chatFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .float { animation: float 3s ease-in-out infinite; }
+
+        /* Scroll reveal */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ===== LOGIN MODAL ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: white;
+            border-radius: 24px;
+            padding: 48px 40px;
+            max-width: 440px;
+            width: 90%;
+            position: relative;
+            animation: fadeInUp 0.4s ease;
+        }
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--gray-100);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: var(--gray-500);
+            transition: all 0.2s;
+        }
+        .modal-close:hover { background: var(--gray-300); }
+        .modal h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        .modal .subtitle {
+            color: var(--gray-500);
+            font-size: 0.95rem;
+            margin-bottom: 28px;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--gray-700);
+        }
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--gray-100);
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+        .form-group input:focus { border-color: var(--primary); }
+        .form-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+            margin-bottom: 20px;
+        }
+        .form-footer label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: var(--gray-500);
+            cursor: pointer;
+        }
+        .form-footer a {
+            font-size: 0.85rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .modal .btn { width: 100%; justify-content: center; }
+        .modal-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 24px 0;
+            color: var(--gray-500);
+            font-size: 0.85rem;
+        }
+        .modal-divider::before,
+        .modal-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--gray-100);
+        }
+        .modal-switch {
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--gray-500);
+        }
+        .modal-switch a {
+            color: var(--primary);
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 968px) {
+            .hero-inner { grid-template-columns: 1fr; text-align: center; }
+            .hero-content { max-width: 100%; }
+            .hero-cta { justify-content: center; }
+            .hero-social-proof { justify-content: center; }
+            .hero-visual { margin-top: 40px; }
+            .phone-mockup { transform: none; }
+            .phone-mockup:hover { transform: none; }
+            .steps-grid { grid-template-columns: 1fr; gap: 40px; }
+            .steps-grid::before { display: none; }
+            .features-grid { grid-template-columns: repeat(2, 1fr); }
+            .platforms-inner { grid-template-columns: 1fr; }
+            .pricing-grid { grid-template-columns: 1fr; max-width: 400px; margin-left: auto; margin-right: auto; }
+            .pricing-card.popular { transform: none; }
+            .testimonials-grid { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr 1fr; }
+            .nav-links { display: none; }
+            .mobile-toggle { display: flex; }
+        }
+        @media (max-width: 600px) {
+            .features-grid { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr; }
+            .footer-bottom { flex-direction: column; gap: 16px; }
+            .section { padding: 70px 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== NAVIGATION ===== -->
+    <nav class="nav" id="navbar">
+        <div class="container nav-inner">
+            <a href="#" class="nav-logo">
+                <div class="nav-logo-icon">&#x2728;</div>
+                BotGenie
+            </a>
+            <div class="nav-links">
+                <a href="#how-it-works">How It Works</a>
+                <a href="#features">Features</a>
+                <a href="#pricing">Pricing</a>
+                <a href="#faq">FAQ</a>
+            </div>
+            <div class="nav-actions">
+                <a href="#" class="nav-login" onclick="openModal('login')">Log in</a>
+                <button class="btn btn-primary btn-sm" onclick="openModal('signup')">Get Started Free</button>
+            </div>
+            <button class="mobile-toggle" onclick="this.classList.toggle('active')">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ===== HERO ===== -->
+    <section class="hero">
+        <div class="container hero-inner">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <span class="pulse"></span>
+                    Powered by Kimi K2.5
+                </div>
+                <h1>Your AI Assistant,<br>Right Inside <span class="highlight">Telegram</span></h1>
+                <p class="hero-desc">
+                    Launch a smart, personal AI chatbot for your business or community in minutes. 
+                    No coding, no setup headaches — just powerful conversations that work.
+                </p>
+                <div class="hero-cta">
+                    <button class="btn btn-primary btn-lg" onclick="openModal('signup')">
+                        Start for Free
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </button>
+                    <a href="#how-it-works" class="btn btn-outline">See How It Works</a>
+                </div>
+                <div class="hero-social-proof">
+                    <div class="hero-avatars">
+                        <div class="avatar" style="background: #6C3CE1;">TM</div>
+                        <div class="avatar" style="background: #FF6B35;">AK</div>
+                        <div class="avatar" style="background: #00D4AA;">SL</div>
+                        <div class="avatar" style="background: #3B82F6;">RM</div>
+                    </div>
+                    <span class="hero-social-text"><strong>2,400+</strong> businesses already using BotGenie</span>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="phone-mockup">
+                    <div class="phone-screen">
+                        <div class="phone-header">
+                            <div class="phone-header-avatar">&#x2728;</div>
+                            <div class="phone-header-info">
+                                <h4>BotGenie Assistant</h4>
+                                <span>&#x25CF; Online</span>
+                            </div>
+                        </div>
+                        <div class="phone-chat">
+                            <div class="chat-msg bot">Hi there! &#x1F44B; I'm your AI assistant. How can I help you today?</div>
+                            <div class="chat-msg user">What are your business hours?</div>
+                            <div class="chat-msg bot">We're open Monday to Friday, 9 AM - 6 PM. Would you like to book an appointment? &#x1F4C5;</div>
+                            <div class="chat-msg user">Yes, tomorrow at 2pm please</div>
+                            <div class="chat-msg bot">Done! &#x2705; You're booked for tomorrow at 2:00 PM. I've sent a confirmation to your number.</div>
+                        </div>
+                        <div class="phone-input">
+                            <div class="phone-input-field">Type a message...</div>
+                            <div class="phone-input-send">
+                                <svg width="16" height="16" fill="white" viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== TRUST BAR ===== -->
+    <div class="trust-bar">
+        <div class="container">
+            <p>Trusted by businesses across</p>
+            <div class="trust-logos">
+                <span class="trust-logo">&#x1F1FF;&#x1F1E6; South Africa</span>
+                <span class="trust-logo">&#x1F1F3;&#x1F1EC; Nigeria</span>
+                <span class="trust-logo">&#x1F1F0;&#x1F1EA; Kenya</span>
+                <span class="trust-logo">&#x1F1EC;&#x1F1ED; Ghana</span>
+                <span class="trust-logo">&#x1F1EC;&#x1F1E7; United Kingdom</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== HOW IT WORKS ===== -->
+    <section class="section" id="how-it-works">
+        <div class="container">
+            <div class="text-center reveal">
+                <span class="badge">&#x26A1; Simple as 1-2-3</span>
+                <h2 class="section-title">Up and Running in Minutes</h2>
+                <p class="section-sub mx-auto">No technical skills needed. Just follow three simple steps and your AI assistant will be live on Telegram.</p>
+            </div>
+            <div class="steps-grid reveal">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <h3>Create Your Account</h3>
+                    <p>Sign up for free in seconds. Just your name, email, and you're in. No credit card required.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <h3>Teach Your Bot</h3>
+                    <p>Tell your bot about your business, upload FAQs, or paste your website. It learns instantly.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h3>Go Live on Telegram</h3>
+                    <p>Connect to Telegram with one click. Your AI assistant is now ready to chat with your customers 24/7.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FEATURES ===== -->
+    <section class="section section-light" id="features">
+        <div class="container">
+            <div class="text-center reveal">
+                <span class="badge">&#x1F680; Powerful Features</span>
+                <h2 class="section-title">Everything You Need to Win</h2>
+                <p class="section-sub mx-auto">Built for real people running real businesses. Every feature is designed to save you time and delight your customers.</p>
+            </div>
+            <div class="features-grid reveal">
+                <div class="feature-card">
+                    <div class="feature-icon">&#x1F9E0;</div>
+                    <h3>Smart AI Conversations</h3>
+                    <p>Powered by Kimi K2.5, your bot understands context, slang, and even multi-language conversations naturally.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#x1F4CA;</div>
+                    <h3>Live Dashboard</h3>
+                    <p>See who's chatting, what they're asking, and how your bot is performing — all in a simple, visual dashboard.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#x1F525;</div>
+                    <h3>Instant Setup</h3>
+                    <p>No coding or API keys to manage. Connect your Telegram bot in one click and start receiving messages immediately.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#x1F310;</div>
+                    <h3>Multi-Language Support</h3>
+                    <p>Your bot speaks your customer's language. Support conversations in English, Zulu, Swahili, French, and more.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#x1F514;</div>
+                    <h3>Smart Notifications</h3>
+                    <p>Get alerted when a customer needs human help or when important messages come through. Never miss a lead.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#x1F6E1;&#xFE0F;</div>
+                    <h3>Safe & Private</h3>
+                    <p>Your data stays yours. Enterprise-grade security with full encryption. We never share your information.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== PLATFORMS ===== -->
+    <section class="section">
+        <div class="container">
+            <div class="text-center reveal">
+                <span class="badge">&#x1F4F1; Where Your Bot Lives</span>
+                <h2 class="section-title">Meet Customers Where They Are</h2>
+                <p class="section-sub mx-auto">Your AI assistant lives on the platforms your customers already use every day.</p>
+            </div>
+            <div class="platforms-inner reveal">
+                <div class="platform-card telegram">
+                    <div class="platform-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="white"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.96 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                    </div>
+                    <h3>Telegram</h3>
+                    <p>Your AI bot lives right inside Telegram. Customers chat naturally and get instant, intelligent responses 24/7.</p>
+                    <button class="btn btn-white btn-sm" onclick="openModal('signup')">Connect Telegram Bot</button>
+                </div>
+                <div class="platform-card whatsapp">
+                    <span class="coming-soon-badge">Coming Soon</span>
+                    <div class="platform-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+                    </div>
+                    <h3>WhatsApp</h3>
+                    <p>We're bringing the same powerful AI experience to WhatsApp. Join the waitlist to be the first to know.</p>
+                    <button class="btn btn-white btn-sm" onclick="openModal('waitlist')" style="opacity: 0.9;">Join Waitlist</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== PRICING ===== -->
+    <section class="section section-light" id="pricing">
+        <div class="container">
+            <div class="text-center reveal">
+                <span class="badge">&#x1F4B0; Simple Pricing</span>
+                <h2 class="section-title">Choose Your Plan</h2>
+                <p class="section-sub mx-auto">Start free, upgrade when you're ready. No hidden fees, cancel anytime.</p>
+            </div>
+            <div class="pricing-grid reveal">
+                <!-- Starter -->
+                <div class="pricing-card">
+                    <h3>Starter</h3>
+                    <div class="price">Free <span></span></div>
+                    <p class="price-desc">Perfect to try things out</p>
+                    <ul class="pricing-features">
+                        <li><span class="check">&#x2713;</span> 1 Telegram bot</li>
+                        <li><span class="check">&#x2713;</span> 500 messages / month</li>
+                        <li><span class="check">&#x2713;</span> Basic AI responses</li>
+                        <li><span class="check">&#x2713;</span> Dashboard access</li>
+                        <li><span class="check">&#x2713;</span> Email support</li>
+                    </ul>
+                    <button class="btn btn-outline" onclick="openModal('signup')">Get Started</button>
+                </div>
+                <!-- Growth -->
+                <div class="pricing-card popular">
+                    <h3>Growth</h3>
+                    <div class="price">$29 <span>/ month</span></div>
+                    <p class="price-desc">For growing businesses</p>
+                    <ul class="pricing-features">
+                        <li><span class="check">&#x2713;</span> 3 Telegram bots</li>
+                        <li><span class="check">&#x2713;</span> 10,000 messages / month</li>
+                        <li><span class="check">&#x2713;</span> Advanced AI + custom training</li>
+                        <li><span class="check">&#x2713;</span> Analytics dashboard</li>
+                        <li><span class="check">&#x2713;</span> Priority support</li>
+                        <li><span class="check">&#x2713;</span> Multi-language</li>
+                    </ul>
+                    <button class="btn btn-primary" onclick="openModal('signup')">Start Free Trial</button>
+                </div>
+                <!-- Business -->
+                <div class="pricing-card">
+                    <h3>Business</h3>
+                    <div class="price">$79 <span>/ month</span></div>
+                    <p class="price-desc">For teams & agencies</p>
+                    <ul class="pricing-features">
+                        <li><span class="check">&#x2713;</span> Unlimited bots</li>
+                        <li><span class="check">&#x2713;</span> Unlimited messages</li>
+                        <li><span class="check">&#x2713;</span> Custom AI personality</li>
+                        <li><span class="check">&#x2713;</span> Advanced analytics</li>
+                        <li><span class="check">&#x2713;</span> Dedicated account manager</li>
+                        <li><span class="check">&#x2713;</span> API access</li>
+                    </ul>
+                    <button class="btn btn-outline" onclick="openModal('signup')">Contact Sales</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== TESTIMONIALS ===== -->
+    <section class="section">
+        <div class="container">
+            <div class="text-center reveal">
+                <span class="badge">&#x1F4AC; What People Say</span>
+                <h2 class="section-title">Loved by Businesses Like Yours</h2>
+            </div>
+            <div class="testimonials-grid reveal">
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">&#x2605;&#x2605;&#x2605;&#x2605;&#x2605;</div>
+                    <blockquote>"I set up my salon's bot in literally 10 minutes. Now it handles bookings while I'm busy with clients. Game changer!"</blockquote>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar" style="background: var(--primary);">NK</div>
+                        <div>
+                            <h4>Nomsa K.</h4>
+                            <span>Hair Salon Owner, Johannesburg</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">&#x2605;&#x2605;&#x2605;&#x2605;&#x2605;</div>
+                    <blockquote>"Our customer response time went from hours to seconds. My team can now focus on what matters instead of answering the same questions."</blockquote>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar" style="background: var(--accent);">JO</div>
+                        <div>
+                            <h4>James O.</h4>
+                            <span>E-commerce Store, Lagos</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">&#x2605;&#x2605;&#x2605;&#x2605;&#x2605;</div>
+                    <blockquote>"I'm not technical at all, but setting this up was easier than posting on social media. My restaurant bot handles reservations perfectly."</blockquote>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar" style="background: var(--teal);">FA</div>
+                        <div>
+                            <h4>Fatima A.</h4>
+                            <span>Restaurant Owner, Nairobi</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FAQ ===== -->
+    <section class="section section-light" id="faq">
+        <div class="container">
+            <div class="text-center reveal">
+                <span class="badge">&#x2753; Common Questions</span>
+                <h2 class="section-title">Frequently Asked Questions</h2>
+            </div>
+            <div class="faq-list reveal">
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>Do I need any technical skills to use BotGenie?</span>
+                        <div class="faq-toggle">+</div>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Not at all! BotGenie is designed for everyone. If you can send a text message, you can set up your AI bot. Our step-by-step guide walks you through everything.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>What is Kimi K2.5 and why do you use it?</span>
+                        <div class="faq-toggle">+</div>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Kimi K2.5 is a powerful AI model that understands conversations naturally. We chose it because it's excellent at understanding context and speaking multiple languages — perfect for real customer conversations.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>Can my bot handle multiple languages?</span>
+                        <div class="faq-toggle">+</div>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Yes! Your bot can automatically detect and respond in the language your customer uses, including English, Zulu, Swahili, French, Portuguese, and many more.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>When will WhatsApp be available?</span>
+                        <div class="faq-toggle">+</div>
+                    </div>
+                    <div class="faq-answer">
+                        <p>WhatsApp integration is coming soon! Join our waitlist and we'll notify you the moment it's ready. In the meantime, you can get started with Telegram right away.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>Can I try it before paying?</span>
+                        <div class="faq-toggle">+</div>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Absolutely! Our Starter plan is completely free. You get 500 messages per month at no cost. Upgrade only when your business needs more.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>What happens when a customer asks something the bot doesn't know?</span>
+                        <div class="faq-toggle">+</div>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Your bot will gracefully let the customer know and can notify you or your team so a human can step in. You're always in control of the conversation.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CTA SECTION ===== -->
+    <section class="cta-section">
+        <div class="container cta-inner">
+            <h2>Ready to Launch Your AI Assistant?</h2>
+            <p>Join thousands of businesses already using BotGenie to serve their customers smarter, faster, and 24/7.</p>
+            <div class="cta-buttons">
+                <button class="btn btn-white btn-lg" onclick="openModal('signup')">
+                    Start for Free
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <h3>
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: var(--gradient); border-radius: 8px; font-size: 0.9rem;">&#x2728;</span>
+                        BotGenie
+                    </h3>
+                    <p>The simplest way to add AI-powered conversations to your business. No code, no complexity — just results.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Product</h4>
+                    <a href="#features">Features</a>
+                    <a href="#pricing">Pricing</a>
+                    <a href="#how-it-works">How It Works</a>
+                    <a href="#">Changelog</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Support</h4>
+                    <a href="#">Help Center</a>
+                    <a href="#faq">FAQ</a>
+                    <a href="#">Contact Us</a>
+                    <a href="#">Status</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Legal</h4>
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Cookie Policy</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 BotGenie. All rights reserved.</span>
+                <div class="footer-socials">
+                    <a href="#" title="Twitter">&#x1D54F;</a>
+                    <a href="#" title="Telegram">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.96 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                    </a>
+                    <a href="#" title="LinkedIn">in</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ===== LOGIN / SIGNUP MODAL ===== -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal" id="loginModal">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <div id="modalContent">
+                <!-- Filled by JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== NAV SCROLL =====
+        window.addEventListener('scroll', () => {
+            document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
+        });
+
+        // ===== SCROLL REVEAL =====
+        const revealElements = document.querySelectorAll('.reveal');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+        revealElements.forEach(el => observer.observe(el));
+
+        // ===== FAQ TOGGLE =====
+        function toggleFaq(el) {
+            const item = el.parentElement;
+            const wasActive = item.classList.contains('active');
+            document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+            if (!wasActive) item.classList.add('active');
+        }
+
+        // ===== MODAL =====
+        function openModal(type) {
+            const overlay = document.getElementById('modalOverlay');
+            const content = document.getElementById('modalContent');
+
+            if (type === 'login') {
+                content.innerHTML = `
+                    <h2>Welcome back</h2>
+                    <p class="subtitle">Log in to your BotGenie dashboard</p>
+                    <div class="form-group">
+                        <label>Email address</label>
+                        <input type="email" placeholder="you@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" placeholder="Enter your password">
+                    </div>
+                    <div class="form-footer">
+                        <label><input type="checkbox"> Remember me</label>
+                        <a href="#">Forgot password?</a>
+                    </div>
+                    <button class="btn btn-primary" onclick="window.location.href='dashboard_4.html'">Log In</button>
+                    <div class="modal-divider">or</div>
+                    <p class="modal-switch">Don't have an account? <a onclick="openModal('signup')">Sign up free</a></p>
+                `;
+            } else if (type === 'signup') {
+                content.innerHTML = `
+                    <h2>Create your account</h2>
+                    <p class="subtitle">Start building your AI assistant for free</p>
+                    <div class="form-group">
+                        <label>Full name</label>
+                        <input type="text" placeholder="John Doe">
+                    </div>
+                    <div class="form-group">
+                        <label>Email address</label>
+                        <input type="email" placeholder="you@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" placeholder="Create a strong password">
+                    </div>
+                    <button class="btn btn-primary" onclick="window.location.href='dashboard_4.html'" style="margin-top: 8px;">Create Account</button>
+                    <div class="modal-divider">or</div>
+                    <p class="modal-switch">Already have an account? <a onclick="openModal('login')">Log in</a></p>
+                `;
+            } else if (type === 'waitlist') {
+                content.innerHTML = `
+                    <h2>Join the WhatsApp Waitlist</h2>
+                    <p class="subtitle">Be the first to know when WhatsApp is ready</p>
+                    <div class="form-group">
+                        <label>Full name</label>
+                        <input type="text" placeholder="John Doe">
+                    </div>
+                    <div class="form-group">
+                        <label>Email address</label>
+                        <input type="email" placeholder="you@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>WhatsApp number (optional)</label>
+                        <input type="tel" placeholder="+27 123 456 789">
+                    </div>
+                    <button class="btn btn-accent" style="margin-top: 8px;" onclick="alert('You\\'re on the list! We\\'ll notify you soon.'); closeModal();">Join Waitlist</button>
+                `;
+            }
+
+            overlay.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
+        // Close modal on overlay click
+        document.getElementById('modalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // Close modal on Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+    </script>
+</body>
+</html>

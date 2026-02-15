@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClawDrop — Your AI Assistant on Telegram</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0a0a0f;
+      --bg-card: #12121a;
+      --bg-card-hover: #1a1a28;
+      --border: #1e1e2e;
+      --text: #e4e4ef;
+      --text-muted: #8888a4;
+      --accent: #6c5ce7;
+      --accent-light: #a29bfe;
+      --accent-glow: rgba(108, 92, 231, 0.3);
+      --green: #00b894;
+      --green-glow: rgba(0, 184, 148, 0.2);
+      --orange: #fdcb6e;
+      --red: #e17055;
+      --gradient: linear-gradient(135deg, #6c5ce7, #a29bfe, #74b9ff);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* === ANIMATIONS === */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    @keyframes marquee {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-40px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(40px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes typing {
+      0% { width: 0; }
+      100% { width: 100%; }
+    }
+    @keyframes blink {
+      50% { border-color: transparent; }
+    }
+
+    .animate-on-scroll {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .animate-on-scroll.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* === NAV === */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(20px);
+      background: rgba(10, 10, 15, 0.8);
+      border-bottom: 1px solid var(--border);
+      transition: all 0.3s;
+    }
+    nav.scrolled {
+      padding: 0.7rem 2rem;
+      background: rgba(10, 10, 15, 0.95);
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 800;
+      font-size: 1.3rem;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--gradient);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      list-style: none;
+    }
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-cta {
+      background: var(--accent) !important;
+      color: white !important;
+      padding: 0.5rem 1.2rem;
+      border-radius: 8px;
+      font-weight: 600 !important;
+      transition: all 0.2s !important;
+    }
+    .nav-cta:hover {
+      background: var(--accent-light) !important;
+      transform: translateY(-1px);
+    }
+
+    /* === HERO === */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 8rem 2rem 4rem;
+      overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(108, 92, 231, 0.15), transparent),
+        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(116, 185, 255, 0.08), transparent),
+        radial-gradient(ellipse 50% 30% at 20% 90%, rgba(0, 184, 148, 0.06), transparent);
+    }
+    .hero-content {
+      position: relative;
+      max-width: 800px;
+      animation: fadeUp 0.8s ease-out;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 1rem;
+      background: rgba(108, 92, 231, 0.1);
+      border: 1px solid rgba(108, 92, 231, 0.3);
+      border-radius: 100px;
+      font-size: 0.85rem;
+      color: var(--accent-light);
+      margin-bottom: 1.5rem;
+    }
+    .hero-badge .dot {
+      width: 8px;
+      height: 8px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4.2rem);
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+      letter-spacing: -0.03em;
+    }
+    .hero h1 .gradient-text {
+      background: var(--gradient);
+      background-size: 200% 200%;
+      animation: gradientShift 4s ease infinite;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      max-width: 560px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.7;
+    }
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 2rem;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      font-family: inherit;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 4px 24px var(--accent-glow);
+    }
+    .btn-primary:hover {
+      background: var(--accent-light);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px var(--accent-glow);
+    }
+    .btn-secondary {
+      background: var(--bg-card);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    /* Hero phone mockup */
+    .hero-visual {
+      margin-top: 4rem;
+      display: flex;
+      justify-content: center;
+      animation: fadeUp 1s ease-out 0.3s both;
+    }
+    .phone-mockup {
+      width: 320px;
+      background: var(--bg-card);
+      border-radius: 28px;
+      border: 2px solid var(--border);
+      padding: 1rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 80px var(--accent-glow);
+      animation: float 6s ease-in-out infinite;
+    }
+    .phone-header {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1rem;
+    }
+    .phone-avatar {
+      width: 36px;
+      height: 36px;
+      background: var(--gradient);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+    .phone-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .phone-status {
+      font-size: 0.75rem;
+      color: var(--green);
+    }
+    .chat-messages {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      padding: 0.5rem;
+    }
+    .msg {
+      max-width: 85%;
+      padding: 0.7rem 1rem;
+      border-radius: 16px;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+    .msg-user {
+      align-self: flex-end;
+      background: var(--accent);
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+    .msg-bot {
+      align-self: flex-start;
+      background: var(--bg-card-hover);
+      color: var(--text);
+      border-bottom-left-radius: 4px;
+    }
+    .msg-time {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      margin-top: 0.3rem;
+      text-align: right;
+    }
+
+    /* === SOCIAL PROOF === */
+    .social-proof {
+      padding: 2rem 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .social-proof-inner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3rem;
+      flex-wrap: wrap;
+      padding: 0 2rem;
+    }
+    .proof-stat {
+      text-align: center;
+    }
+    .proof-stat .number {
+      font-size: 1.8rem;
+      font-weight: 800;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .proof-stat .label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+    }
+
+    /* === SECTION STYLES === */
+    section {
+      padding: 6rem 2rem;
+    }
+    .section-label {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--accent-light);
+      margin-bottom: 0.8rem;
+    }
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+      letter-spacing: -0.02em;
+    }
+    .section-subtitle {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      line-height: 1.7;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* === HOW IT WORKS === */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      margin-top: 4rem;
+    }
+    .step-card {
+      position: relative;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.5rem 2rem;
+      text-align: center;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .step-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(108, 92, 231, 0.1);
+    }
+    .step-number {
+      position: absolute;
+      top: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 36px;
+      height: 36px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: white;
+      box-shadow: 0 4px 12px var(--accent-glow);
+    }
+    .step-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1.2rem;
+      display: block;
+    }
+    .step-card h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+    }
+    .step-card p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .step-connector {
+      display: none;
+    }
+
+    /* === FEATURES / USE CASES === */
+    .features-section {
+      background: linear-gradient(180deg, var(--bg) 0%, rgba(108, 92, 231, 0.03) 50%, var(--bg) 100%);
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.8rem;
+      display: flex;
+      gap: 1.2rem;
+      transition: all 0.3s;
+    }
+    .feature-card:hover {
+      border-color: rgba(108, 92, 231, 0.4);
+      background: var(--bg-card-hover);
+    }
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      min-width: 48px;
+      background: rgba(108, 92, 231, 0.1);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+    }
+    .feature-card h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+    .feature-card p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* === USE CASES MARQUEE === */
+    .use-cases-section {
+      padding: 4rem 0;
+      overflow: hidden;
+    }
+    .use-cases-section .section-header {
+      text-align: center;
+      padding: 0 2rem;
+      margin-bottom: 3rem;
+    }
+    .marquee-row {
+      display: flex;
+      gap: 0.8rem;
+      margin-bottom: 0.8rem;
+      animation: marquee 40s linear infinite;
+      width: max-content;
+    }
+    .marquee-row:nth-child(2) {
+      animation-direction: reverse;
+      animation-duration: 35s;
+    }
+    .marquee-row:nth-child(3) {
+      animation-duration: 45s;
+    }
+    .use-tag {
+      padding: 0.6rem 1.2rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      transition: all 0.3s;
+    }
+    .use-tag:hover {
+      border-color: var(--accent);
+      color: var(--text);
+      background: var(--bg-card-hover);
+    }
+
+    /* === COMPARISON === */
+    .comparison-section {
+      background: var(--bg);
+    }
+    .comparison-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+    .comparison-col {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .comparison-col.highlight {
+      border-color: var(--accent);
+      box-shadow: 0 0 40px var(--accent-glow);
+    }
+    .comparison-col.highlight::before {
+      content: 'RECOMMENDED';
+      position: absolute;
+      top: 1rem;
+      right: -2rem;
+      background: var(--accent);
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 0.3rem 2.5rem;
+      transform: rotate(45deg);
+    }
+    .comparison-col h3 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .comparison-col .subtitle {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+    }
+    .comparison-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .comparison-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.8rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .comparison-list .icon {
+      min-width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      margin-top: 2px;
+    }
+    .icon-x {
+      background: rgba(225, 112, 85, 0.15);
+      color: var(--red);
+    }
+    .icon-check {
+      background: rgba(0, 184, 148, 0.15);
+      color: var(--green);
+    }
+    .comparison-time {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+    }
+    .comparison-time .time {
+      font-size: 2.2rem;
+      font-weight: 800;
+    }
+    .comparison-time .time-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .time-highlight {
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* === CHANNELS === */
+    .channels-section {
+      text-align: center;
+    }
+    .channels-grid {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 3rem;
+      flex-wrap: wrap;
+    }
+    .channel-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.5rem 3rem;
+      text-align: center;
+      min-width: 240px;
+      transition: all 0.3s;
+      position: relative;
+    }
+    .channel-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-4px);
+    }
+    .channel-card.active {
+      border-color: var(--green);
+      box-shadow: 0 0 30px var(--green-glow);
+    }
+    .channel-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+    .channel-card h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+    }
+    .channel-badge {
+      display: inline-block;
+      padding: 0.2rem 0.7rem;
+      border-radius: 100px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge-live {
+      background: rgba(0, 184, 148, 0.15);
+      color: var(--green);
+    }
+    .badge-soon {
+      background: rgba(253, 203, 110, 0.15);
+      color: var(--orange);
+    }
+
+    /* === CTA === */
+    .cta-section {
+      text-align: center;
+      position: relative;
+      padding: 8rem 2rem;
+    }
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 70% 50% at 50% 50%, rgba(108, 92, 231, 0.12), transparent);
+    }
+    .cta-content {
+      position: relative;
+    }
+    .cta-section h2 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 900;
+      margin-bottom: 1rem;
+      letter-spacing: -0.02em;
+    }
+    .cta-section p {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      margin-bottom: 2.5rem;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* === FAQ === */
+    .faq-section {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 6rem 2rem;
+    }
+    .faq-item {
+      border-bottom: 1px solid var(--border);
+      padding: 1.5rem 0;
+    }
+    .faq-question {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      background: none;
+      border: none;
+      width: 100%;
+      text-align: left;
+      font-family: inherit;
+      padding: 0;
+    }
+    .faq-question:hover { color: var(--accent-light); }
+    .faq-question .arrow {
+      font-size: 1.2rem;
+      transition: transform 0.3s;
+      color: var(--text-muted);
+    }
+    .faq-item.open .arrow { transform: rotate(180deg); }
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease, padding 0.3s;
+    }
+    .faq-item.open .faq-answer {
+      max-height: 200px;
+      padding-top: 1rem;
+    }
+    .faq-answer p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    /* === FOOTER === */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 3rem 2rem;
+    }
+    .footer-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .footer-copy {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+    .footer-links a {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--text); }
+
+    /* === MOBILE BURGER === */
+    .mobile-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .mobile-toggle { display: block; }
+      .steps-grid { grid-template-columns: 1fr; max-width: 400px; margin-left: auto; margin-right: auto; }
+      .features-grid { grid-template-columns: 1fr; }
+      .comparison-wrapper { grid-template-columns: 1fr; }
+      .hero { min-height: auto; padding: 7rem 1.5rem 3rem; }
+      .phone-mockup { width: 280px; }
+      .social-proof-inner { gap: 2rem; }
+      section { padding: 4rem 1.5rem; }
+    }
+
+    /* === MOBILE NAV === */
+    .nav-links.open {
+      display: flex;
+      flex-direction: column;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: rgba(10, 10, 15, 0.98);
+      border-bottom: 1px solid var(--border);
+      padding: 1.5rem 2rem;
+      gap: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="#" class="logo">
+    <div class="logo-icon">🤖</div>
+    ClawDrop
+  </a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#how-it-works">How it works</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#channels">Channels</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li><a href="dashboard_2.html" class="nav-cta">Get Started Free</a></li>
+  </ul>
+  <button class="mobile-toggle" id="mobileToggle" onclick="document.getElementById('navLinks').classList.toggle('open')">☰</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      Powered by Kimi K2.5
+    </div>
+    <h1>Your Personal AI Assistant,<br><span class="gradient-text">Right in Your Chat</span></h1>
+    <p>No apps to download. No complicated setup. Just message your AI assistant on Telegram like texting a friend — and it handles the rest.</p>
+    <div class="hero-actions">
+      <a href="dashboard_2.html" class="btn btn-primary">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        Start for Free
+      </a>
+      <a href="#how-it-works" class="btn btn-secondary">See How It Works</a>
+    </div>
+
+    <!-- Phone mockup -->
+    <div class="hero-visual">
+      <div class="phone-mockup">
+        <div class="phone-header">
+          <div class="phone-avatar">🤖</div>
+          <div>
+            <div class="phone-name">ClawDrop AI</div>
+            <div class="phone-status">● online</div>
+          </div>
+        </div>
+        <div class="chat-messages">
+          <div class="msg msg-user">Remind me to call Mom tomorrow at 5pm</div>
+          <div class="msg msg-bot">Done! I'll remind you tomorrow at 5:00 PM to call Mom. 📞<div class="msg-time">Just now</div></div>
+          <div class="msg msg-user">Also summarize my 3 unread emails</div>
+          <div class="msg msg-bot">Here's a quick summary:<br><br>1. <b>Invoice #482</b> — Payment due Feb 20<br>2. <b>Team Lunch</b> — Friday at noon<br>3. <b>Promo</b> — 30% off flight deals<div class="msg-time">Just now</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOCIAL PROOF -->
+<div class="social-proof">
+  <div class="social-proof-inner">
+    <div class="proof-stat">
+      <div class="number">2,400+</div>
+      <div class="label">Active Users</div>
+    </div>
+    <div class="proof-stat">
+      <div class="number">180K+</div>
+      <div class="label">Messages Handled</div>
+    </div>
+    <div class="proof-stat">
+      <div class="number">98.7%</div>
+      <div class="label">Uptime</div>
+    </div>
+    <div class="proof-stat">
+      <div class="number">&lt;30s</div>
+      <div class="label">Setup Time</div>
+    </div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works">
+  <div class="container">
+    <div style="text-align:center" class="animate-on-scroll">
+      <span class="section-label">How it works</span>
+      <h2 class="section-title">Three Steps. That's It.</h2>
+      <p class="section-subtitle" style="margin:0 auto">No servers. No coding. No technical skills required. If you can send a text, you can set this up.</p>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card animate-on-scroll">
+        <div class="step-number">1</div>
+        <span class="step-icon">💬</span>
+        <h3>Connect Telegram</h3>
+        <p>Tap one button to link your Telegram account. We'll create your personal AI bot in seconds.</p>
+      </div>
+      <div class="step-card animate-on-scroll">
+        <div class="step-number">2</div>
+        <span class="step-icon">✨</span>
+        <h3>Tell It What You Need</h3>
+        <p>Give your bot instructions — like "help me manage my schedule" or "summarize my emails daily."</p>
+      </div>
+      <div class="step-card animate-on-scroll">
+        <div class="step-number">3</div>
+        <span class="step-icon">🚀</span>
+        <h3>Go Live Instantly</h3>
+        <p>Your AI assistant is live. Just open Telegram and start chatting. It's that simple.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" class="features-section">
+  <div class="container">
+    <div style="text-align:center" class="animate-on-scroll">
+      <span class="section-label">What it can do</span>
+      <h2 class="section-title">One Assistant. Endless Possibilities.</h2>
+      <p class="section-subtitle" style="margin:0 auto">Just tell it what you need in plain language. No fancy prompts required.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card animate-on-scroll">
+        <div class="feature-icon">📅</div>
+        <div>
+          <h3>Schedule & Reminders</h3>
+          <p>Set meetings, reminders, and to-dos. Your bot keeps you on track without the hassle of another app.</p>
+        </div>
+      </div>
+      <div class="feature-card animate-on-scroll">
+        <div class="feature-icon">📧</div>
+        <div>
+          <h3>Email Summaries</h3>
+          <p>Get a daily digest of your inbox. Know what matters without scrolling through dozens of emails.</p>
+        </div>
+      </div>
+      <div class="feature-card animate-on-scroll">
+        <div class="feature-icon">🌍</div>
+        <div>
+          <h3>Real-Time Translation</h3>
+          <p>Send a message in any language and get it translated instantly. Perfect for travel or multilingual teams.</p>
+        </div>
+      </div>
+      <div class="feature-card animate-on-scroll">
+        <div class="feature-icon">📊</div>
+        <div>
+          <h3>Track Expenses</h3>
+          <p>Snap a receipt or type an amount. Your bot logs and categorizes spending automatically.</p>
+        </div>
+      </div>
+      <div class="feature-card animate-on-scroll">
+        <div class="feature-icon">💡</div>
+        <div>
+          <h3>Research & Answers</h3>
+          <p>Ask anything — from quick facts to in-depth research. Get clear, accurate answers in seconds.</p>
+        </div>
+      </div>
+      <div class="feature-card animate-on-scroll">
+        <div class="feature-icon">✍️</div>
+        <div>
+          <h3>Draft & Write</h3>
+          <p>Need a reply, a social post, or an invoice? Just describe it and your assistant writes it for you.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- USE CASES MARQUEE -->
+<section class="use-cases-section">
+  <div class="section-header animate-on-scroll">
+    <span class="section-label">Use cases</span>
+    <h2 class="section-title">Thousands of Ways to Use It</h2>
+  </div>
+  <div class="marquee-row">
+    <span class="use-tag">Schedule meetings from chat</span>
+    <span class="use-tag">Read & summarize email</span>
+    <span class="use-tag">Draft replies and follow-ups</span>
+    <span class="use-tag">Translate messages in real time</span>
+    <span class="use-tag">Organize your inbox</span>
+    <span class="use-tag">Answer support tickets</span>
+    <span class="use-tag">Summarize long documents</span>
+    <span class="use-tag">Take meeting notes</span>
+    <span class="use-tag">Sync across time zones</span>
+    <span class="use-tag">Do your taxes</span>
+    <span class="use-tag">Track expenses and receipts</span>
+    <!-- duplicate for seamless loop -->
+    <span class="use-tag">Schedule meetings from chat</span>
+    <span class="use-tag">Read & summarize email</span>
+    <span class="use-tag">Draft replies and follow-ups</span>
+    <span class="use-tag">Translate messages in real time</span>
+    <span class="use-tag">Organize your inbox</span>
+    <span class="use-tag">Answer support tickets</span>
+    <span class="use-tag">Summarize long documents</span>
+    <span class="use-tag">Take meeting notes</span>
+    <span class="use-tag">Sync across time zones</span>
+    <span class="use-tag">Do your taxes</span>
+    <span class="use-tag">Track expenses and receipts</span>
+  </div>
+  <div class="marquee-row">
+    <span class="use-tag">Compare insurance quotes</span>
+    <span class="use-tag">Manage subscriptions</span>
+    <span class="use-tag">Remind you of deadlines</span>
+    <span class="use-tag">Plan your week</span>
+    <span class="use-tag">Negotiate deals</span>
+    <span class="use-tag">Run payroll calculations</span>
+    <span class="use-tag">Find best prices online</span>
+    <span class="use-tag">Find discount codes</span>
+    <span class="use-tag">Price-drop alerts</span>
+    <span class="use-tag">Generate invoices</span>
+    <span class="use-tag">Book travel and hotels</span>
+    <!-- duplicate -->
+    <span class="use-tag">Compare insurance quotes</span>
+    <span class="use-tag">Manage subscriptions</span>
+    <span class="use-tag">Remind you of deadlines</span>
+    <span class="use-tag">Plan your week</span>
+    <span class="use-tag">Negotiate deals</span>
+    <span class="use-tag">Run payroll calculations</span>
+    <span class="use-tag">Find best prices online</span>
+    <span class="use-tag">Find discount codes</span>
+    <span class="use-tag">Price-drop alerts</span>
+    <span class="use-tag">Generate invoices</span>
+    <span class="use-tag">Book travel and hotels</span>
+  </div>
+  <div class="marquee-row">
+    <span class="use-tag">Find recipes from ingredients</span>
+    <span class="use-tag">Draft social posts</span>
+    <span class="use-tag">Write contracts and NDAs</span>
+    <span class="use-tag">Monitor news and alerts</span>
+    <span class="use-tag">Set and track goals</span>
+    <span class="use-tag">Screen cold outreach</span>
+    <span class="use-tag">Draft job descriptions</span>
+    <span class="use-tag">Run standup summaries</span>
+    <span class="use-tag">Create presentations</span>
+    <span class="use-tag">Proofread documents</span>
+    <!-- duplicate -->
+    <span class="use-tag">Find recipes from ingredients</span>
+    <span class="use-tag">Draft social posts</span>
+    <span class="use-tag">Write contracts and NDAs</span>
+    <span class="use-tag">Monitor news and alerts</span>
+    <span class="use-tag">Set and track goals</span>
+    <span class="use-tag">Screen cold outreach</span>
+    <span class="use-tag">Draft job descriptions</span>
+    <span class="use-tag">Run standup summaries</span>
+    <span class="use-tag">Create presentations</span>
+    <span class="use-tag">Proofread documents</span>
+  </div>
+</section>
+
+<!-- COMPARISON -->
+<section id="comparison" class="comparison-section">
+  <div class="container">
+    <div style="text-align:center" class="animate-on-scroll">
+      <span class="section-label">Why ClawDrop</span>
+      <h2 class="section-title">Skip the Hard Part</h2>
+      <p class="section-subtitle" style="margin:0 auto">Building an AI assistant yourself is complex. We did the hard work so you don't have to.</p>
+    </div>
+    <div class="comparison-wrapper">
+      <div class="comparison-col animate-on-scroll">
+        <h3>DIY Method 😰</h3>
+        <p class="subtitle">Setting up your own AI assistant</p>
+        <ul class="comparison-list">
+          <li><span class="icon icon-x">✗</span> Rent and configure a server</li>
+          <li><span class="icon icon-x">✗</span> Install software dependencies</li>
+          <li><span class="icon icon-x">✗</span> Set up security and SSH keys</li>
+          <li><span class="icon icon-x">✗</span> Connect APIs and manage tokens</li>
+          <li><span class="icon icon-x">✗</span> Debug errors when things break</li>
+          <li><span class="icon icon-x">✗</span> Keep everything updated</li>
+        </ul>
+        <div class="comparison-time">
+          <div class="time">60+ min</div>
+          <div class="time-label">For technical people. Hours if you're not.</div>
+        </div>
+      </div>
+      <div class="comparison-col highlight animate-on-scroll">
+        <h3>ClawDrop ✨</h3>
+        <p class="subtitle">Your AI assistant, the easy way</p>
+        <ul class="comparison-list">
+          <li><span class="icon icon-check">✓</span> Click "Connect Telegram"</li>
+          <li><span class="icon icon-check">✓</span> Your bot appears automatically</li>
+          <li><span class="icon icon-check">✓</span> Everything is configured for you</li>
+          <li><span class="icon icon-check">✓</span> Powered by Kimi K2.5 — no API keys needed</li>
+          <li><span class="icon icon-check">✓</span> We handle updates and maintenance</li>
+          <li><span class="icon icon-check">✓</span> 24/7 uptime, fully managed</li>
+        </ul>
+        <div class="comparison-time">
+          <div class="time time-highlight">&lt;30 seconds</div>
+          <div class="time-label">No technical skills needed. Zero.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CHANNELS -->
+<section id="channels" class="channels-section">
+  <div class="container">
+    <div class="animate-on-scroll">
+      <span class="section-label">Channels</span>
+      <h2 class="section-title">Where Your Bot Lives</h2>
+      <p class="section-subtitle" style="margin:0 auto">Chat with your AI assistant on the platforms you already use every day.</p>
+    </div>
+    <div class="channels-grid">
+      <div class="channel-card active animate-on-scroll">
+        <span class="channel-icon">✈️</span>
+        <h3>Telegram</h3>
+        <span class="channel-badge badge-live">Live Now</span>
+      </div>
+      <div class="channel-card animate-on-scroll">
+        <span class="channel-icon">💬</span>
+        <h3>WhatsApp</h3>
+        <span class="channel-badge badge-soon">Coming Soon</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" class="faq-section">
+  <div class="animate-on-scroll" style="text-align:center;margin-bottom:3rem">
+    <span class="section-label">FAQ</span>
+    <h2 class="section-title">Common Questions</h2>
+  </div>
+  <div class="faq-item">
+    <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+      Do I need any technical knowledge?
+      <span class="arrow">▾</span>
+    </button>
+    <div class="faq-answer">
+      <p>Not at all! If you can use Telegram, you can use ClawDrop. Everything is set up for you automatically — no coding, no servers, no APIs.</p>
+    </div>
+  </div>
+  <div class="faq-item">
+    <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+      What AI model does it use?
+      <span class="arrow">▾</span>
+    </button>
+    <div class="faq-answer">
+      <p>ClawDrop is powered by Kimi K2.5 — a powerful, fast, and reliable AI model. We chose the best so you don't have to decide.</p>
+    </div>
+  </div>
+  <div class="faq-item">
+    <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+      Is my data safe?
+      <span class="arrow">▾</span>
+    </button>
+    <div class="faq-answer">
+      <p>Yes. Your conversations are encrypted and we never sell your data. You can delete your data at any time from the dashboard.</p>
+    </div>
+  </div>
+  <div class="faq-item">
+    <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+      When is WhatsApp available?
+      <span class="arrow">▾</span>
+    </button>
+    <div class="faq-answer">
+      <p>We're actively working on WhatsApp integration. Sign up now and you'll be first in line when it launches — we'll notify you automatically.</p>
+    </div>
+  </div>
+  <div class="faq-item">
+    <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+      Is there a free plan?
+      <span class="arrow">▾</span>
+    </button>
+    <div class="faq-answer">
+      <p>Yes! You get a generous free tier to try everything out. No credit card required to get started.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-content animate-on-scroll">
+    <h2>Ready to Meet Your<br><span class="gradient-text">AI Assistant?</span></h2>
+    <p>Join thousands of people who saved hours every week. Set up in under 30 seconds — no skills needed.</p>
+    <a href="dashboard_2.html" class="btn btn-primary" style="font-size:1.1rem;padding:1rem 2.5rem">
+      Get Started Free →
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-copy">© 2026 ClawDrop. Built with ❤️ for everyday people.</div>
+    <ul class="footer-links">
+      <li><a href="#">Privacy</a></li>
+      <li><a href="#">Terms</a></li>
+      <li><a href="#">Support</a></li>
+    </ul>
+  </div>
+</footer>
+
+<script>
+  // Navbar scroll effect
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 50);
+  });
+
+  // Animate on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+  document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>

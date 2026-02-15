@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KlawAI — Your Smart AI Assistant on Telegram</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #06080F;
+            --bg-card: #0D1117;
+            --bg-card-hover: #161B22;
+            --surface: #151B25;
+            --border: rgba(255,255,255,0.06);
+            --text: #E6EDF3;
+            --text-muted: #8B949E;
+            --text-dim: #6E7681;
+            --accent: #6C63FF;
+            --accent-light: #8B83FF;
+            --accent-glow: rgba(108,99,255,0.25);
+            --green: #2EA043;
+            --green-light: #3FB950;
+            --telegram: #229ED9;
+            --telegram-glow: rgba(34,158,217,0.2);
+            --whatsapp: #25D366;
+            --gradient-1: linear-gradient(135deg, #6C63FF 0%, #229ED9 100%);
+            --gradient-2: linear-gradient(135deg, #06080F 0%, #151B25 100%);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --radius-xs: 6px;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Utility ── */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+        /* ── Ambient background effects ── */
+        .ambient-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(120px);
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.4;
+        }
+        .orb-1 { width: 600px; height: 600px; background: var(--accent); top: -200px; right: -200px; opacity: 0.12; }
+        .orb-2 { width: 500px; height: 500px; background: var(--telegram); bottom: 20%; left: -150px; opacity: 0.08; }
+        .orb-3 { width: 400px; height: 400px; background: #6C63FF; top: 60%; right: -100px; opacity: 0.06; }
+
+        /* ── Navbar ── */
+        .navbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            padding: 16px 0;
+            transition: all 0.3s ease;
+        }
+        .navbar.scrolled {
+            background: rgba(6,8,15,0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+        .navbar .container {
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .logo {
+            display: flex; align-items: center; gap: 10px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700; font-size: 1.5rem; color: var(--text);
+            text-decoration: none;
+        }
+        .logo-icon {
+            width: 38px; height: 38px;
+            background: var(--gradient-1);
+            border-radius: var(--radius-xs);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem;
+        }
+        .nav-links { display: flex; align-items: center; gap: 32px; list-style: none; }
+        .nav-links a {
+            color: var(--text-muted); text-decoration: none; font-size: 0.9rem;
+            font-weight: 500; transition: color 0.2s;
+        }
+        .nav-links a:hover { color: var(--text); }
+        .nav-cta {
+            display: flex; align-items: center; gap: 12px;
+        }
+        .btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 10px 22px; border-radius: 50px;
+            font-size: 0.9rem; font-weight: 600;
+            text-decoration: none; cursor: pointer;
+            transition: all 0.25s ease; border: none;
+            font-family: inherit;
+        }
+        .btn-ghost {
+            background: transparent; color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+        .btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.15); }
+        .btn-primary {
+            background: var(--accent); color: white;
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+        .btn-primary:hover {
+            background: var(--accent-light);
+            box-shadow: 0 0 30px var(--accent-glow), 0 4px 15px rgba(0,0,0,0.3);
+            transform: translateY(-1px);
+        }
+        .btn-telegram {
+            background: var(--telegram); color: white;
+            box-shadow: 0 0 20px var(--telegram-glow);
+        }
+        .btn-telegram:hover {
+            background: #2bb0f0;
+            box-shadow: 0 0 30px var(--telegram-glow), 0 4px 15px rgba(0,0,0,0.3);
+            transform: translateY(-1px);
+        }
+        .btn-lg { padding: 14px 32px; font-size: 1rem; }
+        .hamburger { display: none; background: none; border: none; color: var(--text); cursor: pointer; }
+
+        /* ── Hero ── */
+        .hero {
+            position: relative;
+            padding: 160px 0 100px;
+            text-align: center;
+            z-index: 1;
+        }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 6px 16px 6px 8px;
+            background: rgba(108,99,255,0.1);
+            border: 1px solid rgba(108,99,255,0.2);
+            border-radius: 50px;
+            font-size: 0.8rem; font-weight: 500;
+            color: var(--accent-light);
+            margin-bottom: 28px;
+        }
+        .hero-badge .dot {
+            width: 8px; height: 8px;
+            background: var(--green-light);
+            border-radius: 50%;
+            animation: pulse-dot 2s ease infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        .hero h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(2.8rem, 6vw, 4.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            margin-bottom: 24px;
+            max-width: 800px;
+            margin-left: auto; margin-right: auto;
+        }
+        .hero h1 .gradient-text {
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero p {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            max-width: 560px;
+            margin: 0 auto 40px;
+            line-height: 1.7;
+        }
+        .hero-buttons {
+            display: flex; align-items: center; justify-content: center;
+            gap: 16px; flex-wrap: wrap;
+        }
+        .hero-stats {
+            display: flex; align-items: center; justify-content: center;
+            gap: 48px; margin-top: 64px;
+            padding-top: 48px;
+            border-top: 1px solid var(--border);
+        }
+        .hero-stat h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem; font-weight: 700; color: var(--text);
+        }
+        .hero-stat p { font-size: 0.85rem; color: var(--text-dim); margin-top: 4px; }
+
+        /* ── Chat Preview ── */
+        .chat-preview-section {
+            position: relative; z-index: 1;
+            padding: 80px 0;
+        }
+        .chat-preview-wrapper {
+            max-width: 440px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 40px var(--accent-glow);
+        }
+        .chat-header {
+            display: flex; align-items: center; gap: 12px;
+            padding: 16px 20px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+        }
+        .chat-avatar {
+            width: 40px; height: 40px;
+            background: var(--gradient-1);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+        }
+        .chat-info h4 { font-size: 0.95rem; font-weight: 600; }
+        .chat-info span { font-size: 0.75rem; color: var(--green-light); }
+        .chat-messages {
+            padding: 20px;
+            display: flex; flex-direction: column; gap: 12px;
+            min-height: 300px;
+        }
+        .chat-msg {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            opacity: 0;
+            animation: msgIn 0.4s ease forwards;
+        }
+        .chat-msg.user {
+            align-self: flex-end;
+            background: var(--accent);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        .chat-msg.bot {
+            align-self: flex-start;
+            background: var(--surface);
+            color: var(--text);
+            border-bottom-left-radius: 4px;
+        }
+        .chat-msg:nth-child(1) { animation-delay: 0.3s; }
+        .chat-msg:nth-child(2) { animation-delay: 1.2s; }
+        .chat-msg:nth-child(3) { animation-delay: 2.4s; }
+        .chat-msg:nth-child(4) { animation-delay: 3.6s; }
+        @keyframes msgIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .typing-indicator {
+            display: flex; gap: 4px; padding: 12px 16px;
+            align-self: flex-start;
+            background: var(--surface);
+            border-radius: 16px;
+            opacity: 0;
+            animation: msgIn 0.4s ease 2s forwards;
+        }
+        .typing-indicator span {
+            width: 6px; height: 6px; background: var(--text-dim);
+            border-radius: 50%;
+            animation: typeBounce 1.4s ease infinite;
+        }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typeBounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-4px); }
+        }
+
+        /* ── Section titles ── */
+        .section-label {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 0.8rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.1em;
+            color: var(--accent-light);
+            margin-bottom: 16px;
+        }
+        .section-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(2rem, 4vw, 2.8rem);
+            font-weight: 700;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            margin-bottom: 16px;
+        }
+        .section-desc {
+            font-size: 1.05rem;
+            color: var(--text-muted);
+            max-width: 540px;
+            line-height: 1.7;
+        }
+
+        /* ── Features ── */
+        .features {
+            position: relative; z-index: 1;
+            padding: 100px 0;
+        }
+        .features-header { text-align: center; margin-bottom: 64px; }
+        .features-header .section-desc { margin: 0 auto; }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px 28px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .feature-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0;
+            height: 2px;
+            background: var(--gradient-1);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .feature-card:hover {
+            border-color: rgba(108,99,255,0.2);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+        }
+        .feature-card:hover::before { opacity: 1; }
+        .feature-icon {
+            width: 48px; height: 48px;
+            background: rgba(108,99,255,0.1);
+            border-radius: var(--radius-sm);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+        }
+        .feature-card h3 {
+            font-size: 1.1rem; font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .feature-card p {
+            font-size: 0.9rem; color: var(--text-muted); line-height: 1.6;
+        }
+
+        /* ── How it works ── */
+        .how-it-works {
+            position: relative; z-index: 1;
+            padding: 100px 0;
+        }
+        .how-header { text-align: center; margin-bottom: 64px; }
+        .how-header .section-desc { margin: 0 auto; }
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+            position: relative;
+        }
+        .steps::before {
+            content: '';
+            position: absolute;
+            top: 40px; left: 15%; right: 15%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), var(--telegram), transparent);
+            opacity: 0.3;
+        }
+        .step {
+            text-align: center;
+            position: relative;
+        }
+        .step-number {
+            width: 64px; height: 64px;
+            background: var(--bg-card);
+            border: 2px solid var(--accent);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.4rem; font-weight: 700;
+            color: var(--accent-light);
+            margin: 0 auto 24px;
+            position: relative;
+            z-index: 2;
+        }
+        .step h3 {
+            font-size: 1.15rem; font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .step p {
+            font-size: 0.9rem; color: var(--text-muted);
+            max-width: 280px; margin: 0 auto; line-height: 1.6;
+        }
+
+        /* ── Platforms ── */
+        .platforms {
+            position: relative; z-index: 1;
+            padding: 100px 0;
+        }
+        .platforms-header { text-align: center; margin-bottom: 64px; }
+        .platforms-header .section-desc { margin: 0 auto; }
+        .platform-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .platform-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 40px 32px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .platform-card.active {
+            border-color: rgba(34,158,217,0.3);
+        }
+        .platform-card.active:hover {
+            border-color: rgba(34,158,217,0.5);
+            box-shadow: 0 0 40px var(--telegram-glow);
+            transform: translateY(-4px);
+        }
+        .platform-card.coming-soon {
+            opacity: 0.6;
+        }
+        .platform-card .platform-icon {
+            font-size: 3rem; margin-bottom: 20px;
+        }
+        .platform-card h3 { font-size: 1.3rem; font-weight: 600; margin-bottom: 8px; }
+        .platform-card p { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 24px; line-height: 1.6; }
+        .badge-live {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 14px;
+            background: rgba(46,160,67,0.15);
+            border: 1px solid rgba(46,160,67,0.3);
+            border-radius: 50px;
+            font-size: 0.8rem; font-weight: 600;
+            color: var(--green-light);
+        }
+        .badge-live .dot {
+            width: 6px; height: 6px;
+            background: var(--green-light);
+            border-radius: 50%;
+            animation: pulse-dot 2s ease infinite;
+        }
+        .badge-coming {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 14px;
+            background: rgba(139,148,158,0.1);
+            border: 1px solid rgba(139,148,158,0.2);
+            border-radius: 50px;
+            font-size: 0.8rem; font-weight: 600;
+            color: var(--text-dim);
+        }
+
+        /* ── Pricing ── */
+        .pricing {
+            position: relative; z-index: 1;
+            padding: 100px 0;
+        }
+        .pricing-header { text-align: center; margin-bottom: 64px; }
+        .pricing-header .section-desc { margin: 0 auto; }
+        .pricing-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            max-width: 960px;
+            margin: 0 auto;
+        }
+        .pricing-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 36px 28px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .pricing-card.popular {
+            border-color: rgba(108,99,255,0.4);
+            box-shadow: 0 0 40px var(--accent-glow);
+        }
+        .popular-tag {
+            position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+            background: var(--accent);
+            color: white;
+            padding: 4px 16px;
+            border-radius: 50px;
+            font-size: 0.75rem; font-weight: 600;
+        }
+        .pricing-card h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; }
+        .pricing-card .price {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.5rem; font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .pricing-card .price span { font-size: 1rem; color: var(--text-muted); font-weight: 400; }
+        .pricing-card .price-desc { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 28px; }
+        .pricing-features { list-style: none; margin-bottom: 28px; }
+        .pricing-features li {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 0;
+            font-size: 0.9rem; color: var(--text-muted);
+        }
+        .pricing-features li .check { color: var(--green-light); font-size: 1rem; }
+        .pricing-card .btn { width: 100%; justify-content: center; }
+
+        /* ── Testimonials ── */
+        .testimonials {
+            position: relative; z-index: 1;
+            padding: 100px 0;
+        }
+        .testimonials-header { text-align: center; margin-bottom: 64px; }
+        .testimonials-header .section-desc { margin: 0 auto; }
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        .testimonial-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+        }
+        .testimonial-stars { color: #F4B400; font-size: 0.9rem; margin-bottom: 16px; letter-spacing: 2px; }
+        .testimonial-card blockquote {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+        .testimonial-author {
+            display: flex; align-items: center; gap: 12px;
+        }
+        .testimonial-avatar {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background: var(--surface);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--accent-light);
+        }
+        .testimonial-author h4 { font-size: 0.9rem; font-weight: 600; }
+        .testimonial-author p { font-size: 0.8rem; color: var(--text-dim); }
+
+        /* ── CTA Section ── */
+        .cta-section {
+            position: relative; z-index: 1;
+            padding: 100px 0;
+        }
+        .cta-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 72px 48px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .cta-box::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%; right: -50%;
+            height: 200%;
+            background: radial-gradient(ellipse at center, rgba(108,99,255,0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .cta-box h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(2rem, 4vw, 2.8rem);
+            font-weight: 700;
+            margin-bottom: 16px;
+            position: relative;
+        }
+        .cta-box p {
+            font-size: 1.1rem; color: var(--text-muted);
+            max-width: 480px; margin: 0 auto 36px;
+            line-height: 1.7;
+            position: relative;
+        }
+        .cta-buttons { position: relative; display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+
+        /* ── Footer ── */
+        .footer {
+            position: relative; z-index: 1;
+            padding: 48px 0;
+            border-top: 1px solid var(--border);
+        }
+        .footer .container {
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 16px;
+        }
+        .footer p { font-size: 0.85rem; color: var(--text-dim); }
+        .footer-links { display: flex; gap: 24px; list-style: none; }
+        .footer-links a { font-size: 0.85rem; color: var(--text-dim); text-decoration: none; transition: color 0.2s; }
+        .footer-links a:hover { color: var(--text-muted); }
+
+        /* ── Auth Modal ── */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 200;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%; max-width: 420px;
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.active .modal { transform: translateY(0); }
+        .modal-close {
+            position: absolute; top: 16px; right: 16px;
+            background: none; border: none;
+            color: var(--text-dim); font-size: 1.5rem;
+            cursor: pointer; transition: color 0.2s;
+            width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .modal-close:hover { color: var(--text); }
+        .modal h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem; font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .modal .modal-sub { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 28px; }
+        .form-group { margin-bottom: 18px; }
+        .form-group label {
+            display: block; font-size: 0.85rem;
+            font-weight: 500; margin-bottom: 6px;
+            color: var(--text-muted);
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xs);
+            color: var(--text);
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+        .form-group input:focus { border-color: var(--accent); }
+        .form-group input::placeholder { color: var(--text-dim); }
+        .modal .btn { width: 100%; justify-content: center; margin-top: 8px; }
+        .modal-footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
+        .modal-footer a {
+            color: var(--accent-light);
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .modal-footer a:hover { text-decoration: underline; }
+
+        /* ── Scroll reveal ── */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 900px) {
+            .features-grid, .steps, .pricing-cards, .testimonials-grid {
+                grid-template-columns: 1fr;
+                max-width: 480px;
+                margin-left: auto; margin-right: auto;
+            }
+            .steps::before { display: none; }
+            .platform-cards { grid-template-columns: 1fr; max-width: 400px; }
+            .hero-stats { gap: 32px; flex-wrap: wrap; }
+        }
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .hamburger { display: block; }
+            .hero { padding: 130px 0 60px; }
+            .hero-stats { gap: 24px; }
+            .cta-box { padding: 48px 24px; }
+        }
+
+        /* ── Mobile Menu ── */
+        .mobile-menu {
+            position: fixed; inset: 0; z-index: 150;
+            background: rgba(6,8,15,0.95);
+            backdrop-filter: blur(20px);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 32px;
+            opacity: 0; visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .mobile-menu.active { opacity: 1; visibility: visible; }
+        .mobile-menu a {
+            font-size: 1.3rem; color: var(--text);
+            text-decoration: none; font-weight: 500;
+        }
+        .mobile-menu-close {
+            position: absolute; top: 20px; right: 24px;
+            background: none; border: none;
+            color: var(--text); font-size: 1.8rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient orbs -->
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+    <div class="ambient-orb orb-3"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <a href="#" class="logo">
+                <div class="logo-icon">🧠</div>
+                KlawAI
+            </a>
+            <ul class="nav-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#how">How It Works</a></li>
+                <li><a href="#platforms">Platforms</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+            </ul>
+            <div class="nav-cta">
+                <button class="btn btn-ghost" onclick="openModal('login')">Log In</button>
+                <button class="btn btn-primary" onclick="openModal('signup')">Get Started Free</button>
+            </div>
+            <button class="hamburger" onclick="toggleMobileMenu()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <button class="mobile-menu-close" onclick="toggleMobileMenu()">✕</button>
+        <a href="#features" onclick="toggleMobileMenu()">Features</a>
+        <a href="#how" onclick="toggleMobileMenu()">How It Works</a>
+        <a href="#platforms" onclick="toggleMobileMenu()">Platforms</a>
+        <a href="#pricing" onclick="toggleMobileMenu()">Pricing</a>
+        <button class="btn btn-ghost" onclick="toggleMobileMenu();openModal('login')">Log In</button>
+        <button class="btn btn-primary" onclick="toggleMobileMenu();openModal('signup')">Get Started Free</button>
+    </div>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-badge">
+                <span class="dot"></span>
+                Powered by Kimi K2.5
+            </div>
+            <h1>Your Personal AI<br><span class="gradient-text">Right in Your Chat</span></h1>
+            <p>Meet KlawAI — the smartest AI assistant that lives inside your Telegram. Ask anything, get instant answers, and boost your productivity. No apps to install, no learning curve.</p>
+            <div class="hero-buttons">
+                <a href="https://t.me/" target="_blank" class="btn btn-telegram btn-lg">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.334-.373-.121l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.832.942z"/></svg>
+                    Start on Telegram
+                </a>
+                <button class="btn btn-primary btn-lg" onclick="openModal('signup')">Create Free Account</button>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <h3>12K+</h3>
+                    <p>Active Users</p>
+                </div>
+                <div class="hero-stat">
+                    <h3>2M+</h3>
+                    <p>Messages Answered</p>
+                </div>
+                <div class="hero-stat">
+                    <h3>98%</h3>
+                    <p>Satisfaction Rate</p>
+                </div>
+                <div class="hero-stat">
+                    <h3>&lt;2s</h3>
+                    <p>Avg Response</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Chat Preview -->
+    <section class="chat-preview-section">
+        <div class="container">
+            <div class="chat-preview-wrapper reveal">
+                <div class="chat-header">
+                    <div class="chat-avatar">🧠</div>
+                    <div class="chat-info">
+                        <h4>KlawAI Bot</h4>
+                        <span>● Online</span>
+                    </div>
+                </div>
+                <div class="chat-messages">
+                    <div class="chat-msg user">Hey, can you help me write a professional email to my boss about taking leave next week?</div>
+                    <div class="typing-indicator"><span></span><span></span><span></span></div>
+                    <div class="chat-msg bot">Of course! Here's a polished email for you:<br><br><em>Subject: Leave Request — [Date]</em><br><br>Dear [Boss's Name],<br><br>I hope this message finds you well. I'm writing to request leave from [start] to [end]...</div>
+                    <div class="chat-msg user">That's perfect, thank you! 🙌</div>
+                    <div class="chat-msg bot">Glad I could help! Feel free to ask me anything else — whether it's drafting messages, answering questions, or brainstorming ideas. I'm always here! 🚀</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="features-header">
+                <span class="section-label">✦ Why KlawAI</span>
+                <h2 class="section-title">AI That Actually<br>Makes Life Easier</h2>
+                <p class="section-desc">No complicated setup, no confusing settings. Just smart AI help whenever you need it, right where you already chat.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card reveal">
+                    <div class="feature-icon">💬</div>
+                    <h3>Just Chat Naturally</h3>
+                    <p>Talk to KlawAI like you'd talk to a friend. No commands to memorize, no special syntax. Just ask your question and get an answer.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Instant Answers</h3>
+                    <p>Get smart, accurate responses in under 2 seconds. Whether it's a quick fact or a detailed explanation, KlawAI delivers fast.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon">✍️</div>
+                    <h3>Write Anything</h3>
+                    <p>Emails, messages, social media posts, essays — tell KlawAI what you need and get polished, ready-to-use text instantly.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon">🌍</div>
+                    <h3>Speaks Your Language</h3>
+                    <p>KlawAI understands and responds in multiple languages. Communicate in the language you're most comfortable with.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Private & Secure</h3>
+                    <p>Your conversations are encrypted and never shared. We take your privacy seriously — your data stays your data.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon">🧠</div>
+                    <h3>Always Getting Smarter</h3>
+                    <p>Powered by Kimi K2.5, one of the most advanced AI models available. You always get the latest and smartest AI capabilities.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="how-it-works" id="how">
+        <div class="container">
+            <div class="how-header">
+                <span class="section-label">✦ Simple Setup</span>
+                <h2 class="section-title">Up and Running<br>in 60 Seconds</h2>
+                <p class="section-desc">No downloads, no installations, no headaches. Getting started with KlawAI is as easy as sending a text.</p>
+            </div>
+            <div class="steps">
+                <div class="step reveal">
+                    <div class="step-number">1</div>
+                    <h3>Create Your Account</h3>
+                    <p>Sign up for free in seconds. Just an email and password — that's all we need.</p>
+                </div>
+                <div class="step reveal">
+                    <div class="step-number">2</div>
+                    <h3>Open Telegram</h3>
+                    <p>Search for @KlawAI_bot on Telegram, tap Start, and connect it to your account.</p>
+                </div>
+                <div class="step reveal">
+                    <div class="step-number">3</div>
+                    <h3>Start Chatting</h3>
+                    <p>That's it! Ask anything and get intelligent answers instantly. No learning curve.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Platforms -->
+    <section class="platforms" id="platforms">
+        <div class="container">
+            <div class="platforms-header">
+                <span class="section-label">✦ Where We Live</span>
+                <h2 class="section-title">Meet Us Where<br>You Already Chat</h2>
+                <p class="section-desc">KlawAI comes to you — no need to switch apps or learn new tools.</p>
+            </div>
+            <div class="platform-cards">
+                <div class="platform-card active reveal">
+                    <div class="platform-icon">
+                        <svg width="52" height="52" viewBox="0 0 24 24" fill="#229ED9"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.334-.373-.121l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.832.942z"/></svg>
+                    </div>
+                    <h3>Telegram</h3>
+                    <p>Our primary home. Full features, instant responses, and a seamless chat experience.</p>
+                    <span class="badge-live"><span class="dot"></span> Live Now</span>
+                </div>
+                <div class="platform-card coming-soon reveal">
+                    <div class="platform-icon">
+                        <svg width="52" height="52" viewBox="0 0 24 24" fill="#25D366"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.144.39-.087.159.058 1.013.478 1.186.565.173.087.289.129.332.202.043.073.043.423-.101.827zM12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492l4.634-1.215A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
+                    </div>
+                    <h3>WhatsApp</h3>
+                    <p>We're working hard to bring KlawAI to WhatsApp. Be the first to know when it launches!</p>
+                    <span class="badge-coming">Coming Soon</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section class="pricing" id="pricing">
+        <div class="container">
+            <div class="pricing-header">
+                <span class="section-label">✦ Pricing</span>
+                <h2 class="section-title">Start Free,<br>Upgrade When Ready</h2>
+                <p class="section-desc">Try KlawAI with zero risk. No credit card needed to get started.</p>
+            </div>
+            <div class="pricing-cards">
+                <div class="pricing-card reveal">
+                    <h3>Free</h3>
+                    <div class="price">$0<span>/mo</span></div>
+                    <p class="price-desc">Perfect for trying things out</p>
+                    <ul class="pricing-features">
+                        <li><span class="check">✓</span> 50 messages per day</li>
+                        <li><span class="check">✓</span> Standard response speed</li>
+                        <li><span class="check">✓</span> Telegram access</li>
+                        <li><span class="check">✓</span> Multi-language support</li>
+                    </ul>
+                    <button class="btn btn-ghost" onclick="openModal('signup')">Get Started</button>
+                </div>
+                <div class="pricing-card popular reveal">
+                    <span class="popular-tag">Most Popular</span>
+                    <h3>Pro</h3>
+                    <div class="price">$9<span>/mo</span></div>
+                    <p class="price-desc">For everyday power users</p>
+                    <ul class="pricing-features">
+                        <li><span class="check">✓</span> Unlimited messages</li>
+                        <li><span class="check">✓</span> Priority response speed</li>
+                        <li><span class="check">✓</span> Longer conversations</li>
+                        <li><span class="check">✓</span> Advanced writing tools</li>
+                        <li><span class="check">✓</span> Priority support</li>
+                    </ul>
+                    <button class="btn btn-primary" onclick="openModal('signup')">Start 7-Day Trial</button>
+                </div>
+                <div class="pricing-card reveal">
+                    <h3>Business</h3>
+                    <div class="price">$29<span>/mo</span></div>
+                    <p class="price-desc">For teams and organizations</p>
+                    <ul class="pricing-features">
+                        <li><span class="check">✓</span> Everything in Pro</li>
+                        <li><span class="check">✓</span> Up to 10 team members</li>
+                        <li><span class="check">✓</span> Custom AI personality</li>
+                        <li><span class="check">✓</span> Analytics dashboard</li>
+                        <li><span class="check">✓</span> Dedicated support</li>
+                    </ul>
+                    <button class="btn btn-ghost" onclick="openModal('signup')">Contact Sales</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonials">
+        <div class="container">
+            <div class="testimonials-header">
+                <span class="section-label">✦ Loved by Users</span>
+                <h2 class="section-title">Real People,<br>Real Results</h2>
+                <p class="section-desc">Join thousands of happy users who made KlawAI part of their daily routine.</p>
+            </div>
+            <div class="testimonials-grid">
+                <div class="testimonial-card reveal">
+                    <div class="testimonial-stars">★★★★★</div>
+                    <blockquote>"I use KlawAI every single day now. It helps me draft emails, answer tricky questions, and even helps my kids with homework. All from Telegram!"</blockquote>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">SM</div>
+                        <div>
+                            <h4>Sarah M.</h4>
+                            <p>Small Business Owner</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card reveal">
+                    <div class="testimonial-stars">★★★★★</div>
+                    <blockquote>"I'm not a tech person at all, but KlawAI is so easy to use. I literally just ask it things and it gives me amazing answers. It's like having a genius friend."</blockquote>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">JK</div>
+                        <div>
+                            <h4>James K.</h4>
+                            <p>Freelance Writer</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card reveal">
+                    <div class="testimonial-stars">★★★★★</div>
+                    <blockquote>"The response speed blew me away. I get answers faster than I can Google things. Plus it actually understands context and gives relevant answers."</blockquote>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">AL</div>
+                        <div>
+                            <h4>Amara L.</h4>
+                            <p>University Student</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-box reveal">
+                <h2>Ready to Chat Smarter?</h2>
+                <p>Join 12,000+ people who already use KlawAI to save time, write better, and get instant answers — all from Telegram.</p>
+                <div class="cta-buttons">
+                    <a href="https://t.me/" target="_blank" class="btn btn-telegram btn-lg">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.334-.373-.121l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.832.942z"/></svg>
+                        Open on Telegram
+                    </a>
+                    <button class="btn btn-primary btn-lg" onclick="openModal('signup')">Create Free Account</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 KlawAI. All rights reserved.</p>
+            <ul class="footer-links">
+                <li><a href="#">Privacy Policy</a></li>
+                <li><a href="#">Terms of Service</a></li>
+                <li><a href="#">Support</a></li>
+            </ul>
+        </div>
+    </footer>
+
+    <!-- Auth Modal -->
+    <div class="modal-overlay" id="authModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal()">✕</button>
+            <h2 id="modalTitle">Create Your Account</h2>
+            <p class="modal-sub" id="modalSub">Start chatting with AI in under 60 seconds</p>
+            <form id="authForm" onsubmit="handleAuth(event)">
+                <div class="form-group" id="nameGroup">
+                    <label>Full Name</label>
+                    <input type="text" placeholder="Your full name" id="nameInput">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" placeholder="you@example.com" id="emailInput" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" placeholder="Create a strong password" id="passwordInput" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg" id="authBtn">Create Account</button>
+            </form>
+            <div class="modal-footer" id="modalFooter">
+                Already have an account? <a onclick="switchModal('login')">Log In</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ── Navbar scroll effect ──
+        window.addEventListener('scroll', () => {
+            document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 40);
+        });
+
+        // ── Scroll reveal ──
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        // ── Mobile menu ──
+        function toggleMobileMenu() {
+            document.getElementById('mobileMenu').classList.toggle('active');
+        }
+
+        // ── Modal ──
+        let currentMode = 'signup';
+
+        function openModal(mode) {
+            currentMode = mode;
+            const modal = document.getElementById('authModal');
+            const title = document.getElementById('modalTitle');
+            const sub = document.getElementById('modalSub');
+            const nameGroup = document.getElementById('nameGroup');
+            const btn = document.getElementById('authBtn');
+            const footer = document.getElementById('modalFooter');
+
+            if (mode === 'signup') {
+                title.textContent = 'Create Your Account';
+                sub.textContent = 'Start chatting with AI in under 60 seconds';
+                nameGroup.style.display = 'block';
+                btn.textContent = 'Create Account';
+                footer.innerHTML = 'Already have an account? <a onclick="switchModal(\'login\')">Log In</a>';
+            } else {
+                title.textContent = 'Welcome Back';
+                sub.textContent = 'Log in to your KlawAI account';
+                nameGroup.style.display = 'none';
+                btn.textContent = 'Log In';
+                footer.innerHTML = 'Don\'t have an account? <a onclick="switchModal(\'signup\')">Sign Up Free</a>';
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('authModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function switchModal(mode) {
+            openModal(mode);
+        }
+
+        function handleAuth(e) {
+            e.preventDefault();
+            // Redirect to dashboard
+            window.location.href = 'dashboard_3.html';
+        }
+
+        // Close modal on overlay click
+        document.getElementById('authModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeModal();
+        });
+
+        // Close modal on Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+    </script>
+</body>
+</html>

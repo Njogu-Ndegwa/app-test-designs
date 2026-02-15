@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClawDrop — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0a0a0f;
+      --bg-sidebar: #0e0e16;
+      --bg-card: #12121a;
+      --bg-card-hover: #1a1a28;
+      --bg-input: #16161f;
+      --border: #1e1e2e;
+      --border-light: #2a2a3e;
+      --text: #e4e4ef;
+      --text-muted: #8888a4;
+      --text-dim: #555570;
+      --accent: #6c5ce7;
+      --accent-light: #a29bfe;
+      --accent-glow: rgba(108, 92, 231, 0.3);
+      --green: #00b894;
+      --green-glow: rgba(0, 184, 148, 0.15);
+      --orange: #fdcb6e;
+      --red: #e17055;
+      --blue: #74b9ff;
+      --gradient: linear-gradient(135deg, #6c5ce7, #a29bfe, #74b9ff);
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* === SIDEBAR === */
+    .sidebar {
+      width: 260px;
+      min-width: 260px;
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 50;
+      transition: transform 0.3s;
+    }
+    .sidebar-header {
+      padding: 0 1.5rem;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--gradient);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+    .logo-text {
+      font-weight: 800;
+      font-size: 1.2rem;
+    }
+    .sidebar-nav {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      padding: 0 0.75rem;
+    }
+    .nav-section-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-dim);
+      padding: 1.2rem 0.75rem 0.5rem;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.65rem 0.75rem;
+      border-radius: 10px;
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .nav-item:hover {
+      background: var(--bg-card);
+      color: var(--text);
+    }
+    .nav-item.active {
+      background: rgba(108, 92, 231, 0.12);
+      color: var(--accent-light);
+    }
+    .nav-item .icon {
+      width: 20px;
+      text-align: center;
+      font-size: 1rem;
+    }
+    .nav-item .badge {
+      margin-left: auto;
+      background: var(--accent);
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.15rem 0.5rem;
+      border-radius: 100px;
+    }
+
+    /* Sidebar footer */
+    .sidebar-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--border);
+      margin-top: auto;
+    }
+    .user-card {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: white;
+    }
+    .user-info .name {
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+    .user-info .plan {
+      font-size: 0.7rem;
+      color: var(--green);
+      font-weight: 500;
+    }
+
+    /* === MAIN === */
+    .main {
+      flex: 1;
+      margin-left: 260px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top bar */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: rgba(10, 10, 15, 0.9);
+      backdrop-filter: blur(20px);
+      z-index: 20;
+    }
+    .topbar-left h1 {
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+    .topbar-left p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .topbar-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text);
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .topbar-btn:hover {
+      border-color: var(--accent);
+      background: var(--bg-card-hover);
+    }
+    .topbar-btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+    .topbar-btn.primary:hover {
+      background: var(--accent-light);
+    }
+
+    /* Content area */
+    .content {
+      padding: 2rem;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    /* === DASHBOARD SECTIONS === */
+
+    /* Bot Status Banner */
+    .status-banner {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .status-banner::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(0, 184, 148, 0.05), transparent 60%);
+    }
+    .status-left {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      position: relative;
+    }
+    .status-dot {
+      width: 48px;
+      height: 48px;
+      background: rgba(0, 184, 148, 0.15);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .status-dot-inner {
+      width: 14px;
+      height: 14px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    .status-text h3 {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+    .status-text p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .status-right {
+      display: flex;
+      gap: 2rem;
+      position: relative;
+    }
+    .status-metric {
+      text-align: center;
+    }
+    .status-metric .value {
+      font-size: 1.4rem;
+      font-weight: 800;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .status-metric .label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.3rem 1.5rem;
+      transition: all 0.3s;
+    }
+    .stat-card:hover {
+      border-color: rgba(108, 92, 231, 0.3);
+      transform: translateY(-2px);
+    }
+    .stat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.8rem;
+    }
+    .stat-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+    .stat-icon.purple { background: rgba(108, 92, 231, 0.12); }
+    .stat-icon.green { background: rgba(0, 184, 148, 0.12); }
+    .stat-icon.blue { background: rgba(116, 185, 255, 0.12); }
+    .stat-icon.orange { background: rgba(253, 203, 110, 0.12); }
+    .stat-trend {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.15rem 0.5rem;
+      border-radius: 100px;
+    }
+    .stat-trend.up {
+      background: rgba(0, 184, 148, 0.12);
+      color: var(--green);
+    }
+    .stat-trend.down {
+      background: rgba(225, 112, 85, 0.12);
+      color: var(--red);
+    }
+    .stat-value {
+      font-size: 1.6rem;
+      font-weight: 800;
+      margin-bottom: 0.2rem;
+    }
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* Main layout: 2 columns */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 1.5rem;
+    }
+
+    /* Card wrapper */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .card-header h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+    .card-header .link {
+      font-size: 0.8rem;
+      color: var(--accent-light);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .card-header .link:hover { text-decoration: underline; }
+    .card-body {
+      padding: 1.5rem;
+    }
+
+    /* Activity chart (CSS only) */
+    .activity-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      height: 140px;
+      padding: 1rem 0;
+    }
+    .chart-bar-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      height: 100%;
+      justify-content: flex-end;
+    }
+    .chart-bar {
+      width: 100%;
+      max-width: 32px;
+      border-radius: 6px 6px 2px 2px;
+      background: var(--accent);
+      opacity: 0.7;
+      transition: all 0.3s;
+      min-height: 4px;
+    }
+    .chart-bar:hover {
+      opacity: 1;
+      transform: scaleY(1.05);
+      transform-origin: bottom;
+    }
+    .chart-bar-label {
+      font-size: 0.6rem;
+      color: var(--text-dim);
+    }
+    .chart-legend {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.5rem;
+      padding-top: 0.5rem;
+      border-top: 1px solid var(--border);
+    }
+    .chart-legend span {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+    }
+
+    /* Recent conversations */
+    .conversation-list {
+      display: flex;
+      flex-direction: column;
+    }
+    .convo-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.8rem;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.2s;
+      cursor: pointer;
+    }
+    .convo-item:last-child { border-bottom: none; }
+    .convo-item:hover { background: var(--bg-card-hover); }
+    .convo-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      min-width: 38px;
+    }
+    .convo-avatar.tg { background: rgba(0, 136, 204, 0.15); }
+    .convo-content {
+      flex: 1;
+      min-width: 0;
+    }
+    .convo-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.2rem;
+    }
+    .convo-name {
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+    .convo-time {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+    }
+    .convo-msg {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .convo-unread {
+      width: 8px;
+      height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+      margin-top: 0.3rem;
+      min-width: 8px;
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+    }
+    .quick-action {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1.2rem;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .quick-action:hover {
+      border-color: var(--accent);
+      background: var(--bg-card-hover);
+      transform: translateY(-2px);
+    }
+    .quick-action .qa-icon {
+      font-size: 1.5rem;
+    }
+    .quick-action .qa-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    /* Telegram Setup Section */
+    .setup-section {
+      margin-bottom: 2rem;
+    }
+    .setup-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+    }
+    .setup-left {
+      flex: 1;
+    }
+    .setup-left h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .setup-left p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+    .setup-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+    .setup-step {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    .setup-step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(108, 92, 231, 0.15);
+      color: var(--accent-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      min-width: 28px;
+    }
+    .setup-step-num.done {
+      background: rgba(0, 184, 148, 0.15);
+      color: var(--green);
+    }
+    .setup-step-text {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .setup-step-text.done {
+      text-decoration: line-through;
+      color: var(--text-dim);
+    }
+    .setup-input-group {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    .setup-input {
+      flex: 1;
+      padding: 0.7rem 1rem;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.85rem;
+      outline: none;
+      transition: border 0.2s;
+    }
+    .setup-input:focus { border-color: var(--accent); }
+    .setup-input::placeholder { color: var(--text-dim); }
+    .setup-btn {
+      padding: 0.7rem 1.5rem;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .setup-btn:hover { background: var(--accent-light); }
+    .setup-right {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .setup-illustration {
+      width: 180px;
+      height: 180px;
+      background: rgba(108, 92, 231, 0.06);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+    }
+
+    /* Settings page content (hidden by default) */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* Settings form */
+    .settings-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    .settings-group {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.8rem;
+    }
+    .settings-group h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .form-field {
+      margin-bottom: 1.2rem;
+    }
+    .form-field:last-child { margin-bottom: 0; }
+    .form-label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+    .form-input {
+      width: 100%;
+      padding: 0.65rem 1rem;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.85rem;
+      outline: none;
+      transition: border 0.2s;
+    }
+    .form-input:focus { border-color: var(--accent); }
+    .form-textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    .form-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.8rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .form-toggle:last-child { border-bottom: none; }
+    .toggle-label {
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    .toggle-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    .toggle-switch {
+      width: 44px;
+      height: 24px;
+      background: var(--border-light);
+      border-radius: 12px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .toggle-switch.on { background: var(--accent); }
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      background: white;
+      border-radius: 50%;
+      top: 3px;
+      left: 3px;
+      transition: transform 0.2s;
+    }
+    .toggle-switch.on::after { transform: translateX(20px); }
+
+    /* Mobile hamburger */
+    .mobile-sidebar-toggle {
+      display: none;
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      z-index: 60;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.5rem 0.7rem;
+      color: var(--text);
+      font-size: 1.3rem;
+      cursor: pointer;
+    }
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 40;
+    }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 1024px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .main-grid { grid-template-columns: 1fr; }
+      .settings-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-overlay.open { display: block; }
+      .mobile-sidebar-toggle { display: block; }
+      .main { margin-left: 0; }
+      .content { padding: 1.5rem 1rem; }
+      .topbar { padding: 1rem 1rem 1rem 3.5rem; }
+      .status-banner { flex-direction: column; gap: 1rem; align-items: flex-start; }
+      .status-right { width: 100%; justify-content: space-around; }
+      .setup-card { flex-direction: column; }
+      .setup-right { display: none; }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .content > * {
+      animation: fadeIn 0.4s ease-out both;
+    }
+    .content > *:nth-child(1) { animation-delay: 0s; }
+    .content > *:nth-child(2) { animation-delay: 0.05s; }
+    .content > *:nth-child(3) { animation-delay: 0.1s; }
+    .content > *:nth-child(4) { animation-delay: 0.15s; }
+  </style>
+</head>
+<body>
+
+<!-- Mobile sidebar toggle -->
+<button class="mobile-sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="logo-icon">🤖</div>
+    <span class="logo-text">ClawDrop</span>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a class="nav-item active" onclick="showPage('overview', this)">
+      <span class="icon">📊</span> Overview
+    </a>
+    <a class="nav-item" onclick="showPage('conversations', this)">
+      <span class="icon">💬</span> Conversations
+      <span class="badge">3</span>
+    </a>
+    <a class="nav-item" onclick="showPage('setup', this)">
+      <span class="icon">🔌</span> Bot Setup
+    </a>
+    <a class="nav-item" onclick="showPage('settings', this)">
+      <span class="icon">⚙️</span> Settings
+    </a>
+
+    <div class="nav-section-label">Resources</div>
+    <a class="nav-item" href="#">
+      <span class="icon">📖</span> Documentation
+    </a>
+    <a class="nav-item" href="#">
+      <span class="icon">🎓</span> Tutorials
+    </a>
+    <a class="nav-item" href="#">
+      <span class="icon">💬</span> Support
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar">JD</div>
+      <div class="user-info">
+        <div class="name">John Doe</div>
+        <div class="plan">Free Plan</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1 id="pageTitle">Dashboard</h1>
+      <p id="pageSubtitle">Welcome back! Here's how your bot is doing.</p>
+    </div>
+    <div class="topbar-right">
+      <button class="topbar-btn" onclick="showPage('setup', document.querySelector('.nav-item:nth-child(3)'))">
+        ⚡ Quick Setup
+      </button>
+      <a href="index_2.html" class="topbar-btn">
+        ← Back to Home
+      </a>
+    </div>
+  </div>
+
+  <!-- OVERVIEW PAGE -->
+  <div class="content page active" id="page-overview">
+    <!-- Status banner -->
+    <div class="status-banner">
+      <div class="status-left">
+        <div class="status-dot"><div class="status-dot-inner"></div></div>
+        <div class="status-text">
+          <h3>Your Bot is Live ✨</h3>
+          <p>Connected to Telegram • Powered by Kimi K2.5</p>
+        </div>
+      </div>
+      <div class="status-right">
+        <div class="status-metric">
+          <div class="value">99.9%</div>
+          <div class="label">Uptime</div>
+        </div>
+        <div class="status-metric">
+          <div class="value">0.8s</div>
+          <div class="label">Avg Response</div>
+        </div>
+        <div class="status-metric">
+          <div class="value">Kimi K2.5</div>
+          <div class="label">AI Model</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-icon purple">💬</div>
+          <span class="stat-trend up">↑ 12%</span>
+        </div>
+        <div class="stat-value">1,247</div>
+        <div class="stat-label">Messages Today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-icon green">👥</div>
+          <span class="stat-trend up">↑ 8%</span>
+        </div>
+        <div class="stat-value">384</div>
+        <div class="stat-label">Active Users</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-icon blue">⚡</div>
+          <span class="stat-trend up">↑ 3%</span>
+        </div>
+        <div class="stat-value">96.2%</div>
+        <div class="stat-label">Resolution Rate</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-icon orange">⭐</div>
+          <span class="stat-trend up">↑ 2%</span>
+        </div>
+        <div class="stat-value">4.8/5</div>
+        <div class="stat-label">User Satisfaction</div>
+      </div>
+    </div>
+
+    <!-- 2-column layout -->
+    <div class="main-grid">
+      <!-- Activity chart -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Message Activity (Last 7 Days)</h3>
+          <span class="link">View details</span>
+        </div>
+        <div class="card-body">
+          <div class="activity-chart">
+            <div class="chart-bar-wrapper">
+              <div class="chart-bar" style="height:45%"></div>
+              <span class="chart-bar-label">Mon</span>
+            </div>
+            <div class="chart-bar-wrapper">
+              <div class="chart-bar" style="height:62%"></div>
+              <span class="chart-bar-label">Tue</span>
+            </div>
+            <div class="chart-bar-wrapper">
+              <div class="chart-bar" style="height:78%"></div>
+              <span class="chart-bar-label">Wed</span>
+            </div>
+            <div class="chart-bar-wrapper">
+              <div class="chart-bar" style="height:55%"></div>
+              <span class="chart-bar-label">Thu</span>
+            </div>
+            <div class="chart-bar-wrapper">
+              <div class="chart-bar" style="height:90%"></div>
+              <span class="chart-bar-label">Fri</span>
+            </div>
+            <div class="chart-bar-wrapper">
+              <div class="chart-bar" style="height:72%"></div>
+              <span class="chart-bar-label">Sat</span>
+            </div>
+            <div class="chart-bar-wrapper">
+              <div class="chart-bar" style="height:100%"></div>
+              <span class="chart-bar-label">Sun</span>
+            </div>
+          </div>
+          <div class="chart-legend">
+            <span>Total: 8,743 messages</span>
+            <span>Peak: Sunday (1,892)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right column -->
+      <div style="display:flex;flex-direction:column;gap:1.5rem">
+        <!-- Quick Actions -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Quick Actions</h3>
+          </div>
+          <div class="card-body">
+            <div class="quick-actions">
+              <a class="quick-action" onclick="showPage('setup', document.querySelector('.nav-item:nth-child(3)'))">
+                <span class="qa-icon">🔌</span>
+                <span class="qa-label">Setup Bot</span>
+              </a>
+              <a class="quick-action" onclick="showPage('settings', document.querySelector('.nav-item:nth-child(4)'))">
+                <span class="qa-icon">✏️</span>
+                <span class="qa-label">Edit Instructions</span>
+              </a>
+              <a class="quick-action" onclick="showPage('conversations', document.querySelector('.nav-item:nth-child(2)'))">
+                <span class="qa-icon">📋</span>
+                <span class="qa-label">View Chats</span>
+              </a>
+              <a class="quick-action" href="#">
+                <span class="qa-icon">📊</span>
+                <span class="qa-label">Export Data</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Channel Status -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Channels</h3>
+          </div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:0.8rem">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:0.6rem;background:var(--bg-input);border-radius:10px">
+              <div style="display:flex;align-items:center;gap:0.7rem">
+                <span style="font-size:1.3rem">✈️</span>
+                <div>
+                  <div style="font-weight:600;font-size:0.85rem">Telegram</div>
+                  <div style="font-size:0.7rem;color:var(--green)">Connected</div>
+                </div>
+              </div>
+              <span style="font-size:0.7rem;font-weight:600;padding:0.2rem 0.6rem;background:rgba(0,184,148,0.12);color:var(--green);border-radius:100px">LIVE</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:0.6rem;background:var(--bg-input);border-radius:10px;opacity:0.6">
+              <div style="display:flex;align-items:center;gap:0.7rem">
+                <span style="font-size:1.3rem">💬</span>
+                <div>
+                  <div style="font-weight:600;font-size:0.85rem">WhatsApp</div>
+                  <div style="font-size:0.7rem;color:var(--orange)">Coming Soon</div>
+                </div>
+              </div>
+              <span style="font-size:0.7rem;font-weight:600;padding:0.2rem 0.6rem;background:rgba(253,203,110,0.12);color:var(--orange);border-radius:100px">SOON</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONVERSATIONS PAGE -->
+  <div class="content page" id="page-conversations">
+    <div class="card">
+      <div class="card-header">
+        <h3>Recent Conversations</h3>
+        <span class="link">Export all</span>
+      </div>
+      <div class="conversation-list">
+        <div class="convo-item">
+          <div class="convo-avatar tg">✈️</div>
+          <div class="convo-content">
+            <div class="convo-header">
+              <span class="convo-name">Sarah K.</span>
+              <span class="convo-time">2 min ago</span>
+            </div>
+            <div class="convo-msg">Can you help me plan my trip to Tokyo next month? I need flight and hotel suggestions...</div>
+          </div>
+          <div class="convo-unread"></div>
+        </div>
+        <div class="convo-item">
+          <div class="convo-avatar tg">✈️</div>
+          <div class="convo-content">
+            <div class="convo-header">
+              <span class="convo-name">Mike T.</span>
+              <span class="convo-time">15 min ago</span>
+            </div>
+            <div class="convo-msg">Summarize my meeting notes from today and send me the action items please</div>
+          </div>
+          <div class="convo-unread"></div>
+        </div>
+        <div class="convo-item">
+          <div class="convo-avatar tg">✈️</div>
+          <div class="convo-content">
+            <div class="convo-header">
+              <span class="convo-name">Emma L.</span>
+              <span class="convo-time">1 hour ago</span>
+            </div>
+            <div class="convo-msg">What are some good birthday gift ideas for a 30-year-old who likes hiking?</div>
+          </div>
+        </div>
+        <div class="convo-item">
+          <div class="convo-avatar tg">✈️</div>
+          <div class="convo-content">
+            <div class="convo-header">
+              <span class="convo-name">David R.</span>
+              <span class="convo-time">2 hours ago</span>
+            </div>
+            <div class="convo-msg">Translate this document from Spanish to English and format it nicely for me</div>
+          </div>
+        </div>
+        <div class="convo-item">
+          <div class="convo-avatar tg">✈️</div>
+          <div class="convo-content">
+            <div class="convo-header">
+              <span class="convo-name">Lisa M.</span>
+              <span class="convo-time">3 hours ago</span>
+            </div>
+            <div class="convo-msg">I need to track my expenses for January. Can you create a spreadsheet breakdown?</div>
+          </div>
+        </div>
+        <div class="convo-item">
+          <div class="convo-avatar tg">✈️</div>
+          <div class="convo-content">
+            <div class="convo-header">
+              <span class="convo-name">Alex P.</span>
+              <span class="convo-time">5 hours ago</span>
+            </div>
+            <div class="convo-msg">Set a reminder for me: dentist appointment on Feb 20 at 2pm and send me a prep list</div>
+          </div>
+        </div>
+        <div class="convo-item">
+          <div class="convo-avatar tg">✈️</div>
+          <div class="convo-content">
+            <div class="convo-header">
+              <span class="convo-name">Rachel W.</span>
+              <span class="convo-time">Yesterday</span>
+            </div>
+            <div class="convo-msg">Draft a professional reply to my landlord about the maintenance request I submitted</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETUP PAGE -->
+  <div class="content page" id="page-setup">
+    <div class="setup-section">
+      <div class="setup-card">
+        <div class="setup-left">
+          <h3>Connect Your Telegram Bot</h3>
+          <p>Follow these simple steps to get your AI assistant up and running. No technical knowledge needed — just copy and paste!</p>
+          <div class="setup-steps">
+            <div class="setup-step">
+              <div class="setup-step-num done">✓</div>
+              <span class="setup-step-text done">Create your ClawDrop account</span>
+            </div>
+            <div class="setup-step">
+              <div class="setup-step-num">2</div>
+              <span class="setup-step-text">Open <strong>@BotFather</strong> in Telegram and send <code style="background:var(--bg-input);padding:0.1rem 0.4rem;border-radius:4px;font-size:0.8rem">/newbot</code></span>
+            </div>
+            <div class="setup-step">
+              <div class="setup-step-num">3</div>
+              <span class="setup-step-text">Choose a name for your bot (e.g. "My AI Helper")</span>
+            </div>
+            <div class="setup-step">
+              <div class="setup-step-num">4</div>
+              <span class="setup-step-text">Copy the token BotFather gives you and paste it below</span>
+            </div>
+          </div>
+          <div class="setup-input-group">
+            <input type="text" class="setup-input" placeholder="Paste your bot token here..." id="botToken">
+            <button class="setup-btn" onclick="testConnection()">Connect Bot</button>
+          </div>
+          <p id="connectionStatus" style="margin-top:0.8rem;font-size:0.8rem;display:none"></p>
+        </div>
+        <div class="setup-right">
+          <div class="setup-illustration">🤖</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Video tutorial placeholder -->
+    <div class="card">
+      <div class="card-header">
+        <h3>Video Tutorial</h3>
+        <span class="link">Watch on YouTube</span>
+      </div>
+      <div class="card-body" style="text-align:center;padding:3rem">
+        <div style="font-size:3rem;margin-bottom:1rem">🎬</div>
+        <h3 style="margin-bottom:0.5rem">Need help? Watch the 2-minute walkthrough</h3>
+        <p style="font-size:0.85rem;color:var(--text-muted)">We'll show you exactly how to set up your bot step by step.</p>
+        <button class="setup-btn" style="margin-top:1rem">▶ Play Tutorial</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS PAGE -->
+  <div class="content page" id="page-settings">
+    <div class="settings-grid">
+      <div class="settings-group">
+        <h3>🤖 Bot Personality</h3>
+        <div class="form-field">
+          <label class="form-label">Bot Name</label>
+          <input type="text" class="form-input" value="My AI Assistant" placeholder="What should your bot be called?">
+        </div>
+        <div class="form-field">
+          <label class="form-label">Instructions</label>
+          <textarea class="form-input form-textarea" placeholder="Tell your bot how to behave...">You are a helpful, friendly assistant. Always respond in a warm and conversational tone. Keep answers concise but thorough. If you're unsure about something, be honest about it.</textarea>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Language</label>
+          <select class="form-input">
+            <option>English</option>
+            <option>Spanish</option>
+            <option>French</option>
+            <option>Portuguese</option>
+            <option>German</option>
+            <option>Swahili</option>
+            <option>Arabic</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <h3>⚙️ Preferences</h3>
+        <div class="form-toggle">
+          <div>
+            <div class="toggle-label">Auto-reply</div>
+            <div class="toggle-desc">Bot responds to all messages automatically</div>
+          </div>
+          <div class="toggle-switch on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="form-toggle">
+          <div>
+            <div class="toggle-label">Daily Digest</div>
+            <div class="toggle-desc">Get a daily summary of conversations</div>
+          </div>
+          <div class="toggle-switch" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="form-toggle">
+          <div>
+            <div class="toggle-label">Smart Suggestions</div>
+            <div class="toggle-desc">Bot suggests follow-up actions</div>
+          </div>
+          <div class="toggle-switch on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="form-toggle">
+          <div>
+            <div class="toggle-label">Notification Sound</div>
+            <div class="toggle-desc">Play a sound for new messages</div>
+          </div>
+          <div class="toggle-switch on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="form-toggle">
+          <div>
+            <div class="toggle-label">Read Receipts</div>
+            <div class="toggle-desc">Show when bot has read a message</div>
+          </div>
+          <div class="toggle-switch" onclick="this.classList.toggle('on')"></div>
+        </div>
+      </div>
+
+      <div class="settings-group" style="grid-column:1/-1">
+        <h3>🔐 Account & Security</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+          <div class="form-field">
+            <label class="form-label">Email Address</label>
+            <input type="email" class="form-input" value="john@example.com">
+          </div>
+          <div class="form-field">
+            <label class="form-label">Phone Number</label>
+            <input type="tel" class="form-input" value="+1 (555) 123-4567">
+          </div>
+        </div>
+        <div style="margin-top:1.5rem;display:flex;gap:0.8rem">
+          <button class="setup-btn">Save Changes</button>
+          <button class="setup-btn" style="background:var(--bg-input);color:var(--red);border:1px solid var(--border)">Delete Account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Page navigation
+  function showPage(pageId, navItem) {
+    // Hide all pages
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    // Show target page
+    const target = document.getElementById('page-' + pageId);
+    if (target) target.classList.add('active');
+
+    // Update nav active state
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    if (navItem) navItem.classList.add('active');
+
+    // Update top bar
+    const titles = {
+      overview: ['Dashboard', "Welcome back! Here's how your bot is doing."],
+      conversations: ['Conversations', 'View and manage your bot interactions.'],
+      setup: ['Bot Setup', 'Connect your Telegram bot in a few clicks.'],
+      settings: ['Settings', 'Customize your bot and account preferences.']
+    };
+    const t = titles[pageId] || titles.overview;
+    document.getElementById('pageTitle').textContent = t[0];
+    document.getElementById('pageSubtitle').textContent = t[1];
+
+    // Close mobile sidebar
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('open');
+  }
+
+  // Sidebar mobile toggle
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('open');
+  }
+
+  // Fake connection test
+  function testConnection() {
+    const token = document.getElementById('botToken').value;
+    const status = document.getElementById('connectionStatus');
+    status.style.display = 'block';
+
+    if (!token.trim()) {
+      status.style.color = 'var(--red)';
+      status.textContent = '⚠️ Please paste your bot token first.';
+      return;
+    }
+
+    status.style.color = 'var(--orange)';
+    status.textContent = '⏳ Testing connection...';
+
+    setTimeout(() => {
+      status.style.color = 'var(--green)';
+      status.textContent = '✅ Bot connected successfully! Your AI assistant is now live on Telegram.';
+    }, 2000);
+  }
+</script>
+
+</body>
+</html>
