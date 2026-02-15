@@ -395,6 +395,7 @@
     @media (max-width: 768px) {
       body { flex-direction: column; }
       .sidebar { display: none; }
+      .desktop-only { display: none !important; }
       .main { margin-left: 0; padding: 16px 16px 80px; flex: 1; }
       .mobile-topbar { display: flex; }
       .bottom-tabs { display: block; }
@@ -552,7 +553,7 @@
   <div class="page active" id="page-dashboard">
     <div class="main-header">
       <h1>Dashboard</h1>
-      <button class="btn btn-accent" onclick="openWizard()">+ New Bot</button>
+      <button class="btn btn-accent desktop-only" onclick="openWizard()">+ New Bot</button>
     </div>
 
     <div class="stats-grid">
@@ -650,7 +651,7 @@
   <div class="page" id="page-bots">
     <div class="main-header">
       <h1>My Bots</h1>
-      <button class="btn btn-accent" onclick="openWizard()">+ New Bot</button>
+      <button class="btn btn-accent desktop-only" onclick="openWizard()">+ New Bot</button>
     </div>
 
     <div id="bot-list">
