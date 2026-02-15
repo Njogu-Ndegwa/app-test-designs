@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>ClawHusk — Your AI Assistant on Telegram in Under 1 Minute</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
@@ -149,7 +149,7 @@
     }
     .video-placeholder {
       width: 100%; border-radius: var(--radius);
-      background: #0c0c10;
+      background: #000;
       border: 1px solid var(--border);
       min-height: 260px;
       position: relative;
@@ -162,11 +162,18 @@
       z-index: 2;
       background: rgba(12, 12, 16, 0.55);
     }
+    .video-bg-blur {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      object-fit: cover;
+      filter: blur(24px) brightness(0.4);
+      transform: scale(1.3);
+      z-index: 0;
+      pointer-events: none;
+    }
     .video-thumbnail {
       position: absolute; top: 0; left: 0; width: 100%; height: 100%;
       object-fit: contain; border-radius: var(--radius);
       z-index: 1;
-      background: #000;
     }
     .video-placeholder .play-btn {
       width: 60px; height: 60px; border-radius: 50%;
@@ -270,7 +277,7 @@
       border: 1px solid var(--border);
       background: var(--bg-input);
       color: var(--text-bright);
-      font-size: 0.88rem;
+      font-size: 16px;
       font-family: 'JetBrains Mono', monospace;
       outline: none;
       transition: border-color 0.2s;
@@ -474,7 +481,7 @@
       }
       .setup-steps { padding: 20px 20px; }
       .step-list li { font-size: 0.85rem; }
-      .token-input { font-size: 0.82rem; }
+      .token-input { font-size: 16px; }
       .comparison { grid-template-columns: 1fr; }
       .comparison-section { padding: 60px 16px; }
       .deploy-bar {
@@ -687,10 +694,12 @@
       <!-- Left: video tutorial -->
       <div class="setup-video">
         <div class="video-placeholder" id="videoContainer" style="cursor:pointer;" onclick="playVideo()">
-          <!-- Thumbnail: Cloudinary auto-generates from video at 1s mark -->
-          <img class="video-thumbnail" id="videoThumb" src="https://res.cloudinary.com/dhffnvn2d/video/upload/so_1,w_600,c_pad,ar_4:3,b_black/v1771135515/img-0668_pETb6bVa_gmgvhr.jpg" alt="Tutorial preview">
-          <!-- Video: Cloudinary pads portrait video into 4:3 with black bars -->
-          <video id="tutorialVideo" src="https://res.cloudinary.com/dhffnvn2d/video/upload/c_pad,ar_4:3,b_black/v1771135515/img-0668_pETb6bVa_gmgvhr.mp4" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;border-radius:var(--radius);display:none;z-index:4;background:#000;" playsinline></video>
+          <!-- Blurred background fill (portrait frame, no padding, heavily blurred) -->
+          <img class="video-bg-blur" id="videoBgBlur" src="https://res.cloudinary.com/dhffnvn2d/video/upload/so_1,w_200,c_fill,q_20/v1771135515/img-0668_pETb6bVa_gmgvhr.jpg" alt="">
+          <!-- Thumbnail: sharp, contained with full height -->
+          <img class="video-thumbnail" id="videoThumb" src="https://res.cloudinary.com/dhffnvn2d/video/upload/so_1,w_600,c_fill/v1771135515/img-0668_pETb6bVa_gmgvhr.jpg" alt="Tutorial preview">
+          <!-- Video: original portrait video, contained to preserve full height -->
+          <video id="tutorialVideo" src="https://res.cloudinary.com/dhffnvn2d/video/upload/v1771135515/img-0668_pETb6bVa_gmgvhr.mp4" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;border-radius:var(--radius);display:none;z-index:4;" playsinline></video>
           <!-- Play overlay -->
           <div class="video-overlay" id="videoOverlay">
             <div class="play-btn">
