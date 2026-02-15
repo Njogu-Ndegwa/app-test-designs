@@ -186,6 +186,24 @@
       font-weight: 500; z-index: 3;
       text-shadow: 0 1px 4px rgba(0,0,0,0.5);
     }
+    /* Tap-to-pause overlay */
+    .video-pause-overlay {
+      display: none;
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 5; cursor: pointer;
+    }
+    .video-pause-overlay.active { display: block; }
+    .pause-indicator {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      width: 52px; height: 52px; border-radius: 50%;
+      background: rgba(0,0,0,0.6);
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.2s ease;
+      pointer-events: none;
+    }
+    .pause-indicator.show { transform: translate(-50%, -50%) scale(1); }
+    .pause-indicator svg { fill: #fff; }
     /* Phone mockup inside video area */
     .phone-frame {
       position: absolute; right: -10px; bottom: -20px;
@@ -450,9 +468,8 @@
         order: -1; /* video on top */
       }
       .video-placeholder {
-        min-height: 220px;
-        aspect-ratio: 9 / 16;
-        max-height: 420px;
+        min-height: 0;
+        aspect-ratio: 4 / 3;
       }
       .setup-steps { padding: 20px 20px; }
       .step-list li { font-size: 0.85rem; }
@@ -474,7 +491,6 @@
       .hero-tags { gap: 8px; }
       .htag { font-size: 0.72rem; padding: 5px 10px; }
       .setup-header h2 { font-size: 1.1rem; }
-      .video-placeholder { min-height: 200px; }
       .video-placeholder .play-btn { width: 50px; height: 50px; }
       .video-placeholder .play-btn svg { width: 18px; height: 18px; }
       .video-placeholder .vid-label { font-size: 0.75rem; }
@@ -670,14 +686,23 @@
       <!-- Left: video tutorial -->
       <div class="setup-video">
         <div class="video-placeholder" id="videoContainer" style="cursor:pointer;" onclick="playVideo()">
-          <!-- Thumbnail: grab frame from the video via Cloudinary transformation -->
-          <img class="video-thumbnail" id="videoThumb" src="https://res.cloudinary.com/dhffnvn2d/video/upload/so_1/v1771135515/img-0668_pETb6bVa_gmgvhr.jpg" alt="Tutorial preview">
-          <video id="tutorialVideo" src="https://res.cloudinary.com/dhffnvn2d/video/upload/v1771135515/img-0668_pETb6bVa_gmgvhr.mp4" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border-radius:var(--radius);display:none;z-index:4;" playsinline></video>
+          <!-- Thumbnail: Cloudinary auto-generates from video at 1s mark -->
+          <img class="video-thumbnail" id="videoThumb" src="https://res.cloudinary.com/dhffnvn2d/video/upload/so_1,w_600,c_fill,ar_4:3/v1771135515/img-0668_pETb6bVa_gmgvhr.jpg" alt="Tutorial preview">
+          <!-- Video: Cloudinary pads portrait video into 4:3 with black bars -->
+          <video id="tutorialVideo" src="https://res.cloudinary.com/dhffnvn2d/video/upload/c_pad,ar_4:3,b_black/v1771135515/img-0668_pETb6bVa_gmgvhr.mp4" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;border-radius:var(--radius);display:none;z-index:4;background:#000;" playsinline></video>
+          <!-- Play overlay -->
           <div class="video-overlay" id="videoOverlay">
             <div class="play-btn">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7L8 5z" fill="#111"/></svg>
             </div>
             <div class="vid-label">Watch the 30-second tutorial</div>
+          </div>
+          <!-- Tap-to-pause overlay (shown when video is playing) -->
+          <div class="video-pause-overlay" id="pauseOverlay" onclick="togglePause(event)">
+            <div class="pause-indicator" id="pauseIndicator">
+              <svg id="pauseIcon" width="24" height="24" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1" fill="#fff"/><rect x="14" y="5" width="4" height="14" rx="1" fill="#fff"/></svg>
+              <svg id="playIcon" width="24" height="24" viewBox="0 0 24 24" style="display:none;"><path d="M8 5v14l11-7L8 5z" fill="#fff"/></svg>
+            </div>
           </div>
         </div>
       </div>
@@ -948,11 +973,43 @@
     const video = document.getElementById('tutorialVideo');
     const overlay = document.getElementById('videoOverlay');
     const thumb = document.getElementById('videoThumb');
+    const pauseOv = document.getElementById('pauseOverlay');
+    const container = document.getElementById('videoContainer');
+
     video.style.display = 'block';
     overlay.style.display = 'none';
     if (thumb) thumb.style.display = 'none';
+    container.onclick = null; // remove the initial play handler
+
+    // Show native controls on desktop, tap overlay on mobile
+    if (window.innerWidth > 768) {
+      video.setAttribute('controls', 'true');
+    } else {
+      pauseOv.classList.add('active');
+    }
     video.play();
-    video.setAttribute('controls', 'true');
+  }
+
+  function togglePause(e) {
+    e.stopPropagation();
+    const video = document.getElementById('tutorialVideo');
+    const indicator = document.getElementById('pauseIndicator');
+    const pauseIcon = document.getElementById('pauseIcon');
+    const playIcon = document.getElementById('playIcon');
+
+    if (video.paused) {
+      video.play();
+      pauseIcon.style.display = 'block';
+      playIcon.style.display = 'none';
+    } else {
+      video.pause();
+      pauseIcon.style.display = 'none';
+      playIcon.style.display = 'block';
+    }
+
+    // Flash the indicator
+    indicator.classList.add('show');
+    setTimeout(() => indicator.classList.remove('show'), 600);
   }
 
   function testToken() {
