@@ -393,8 +393,9 @@
     .tab-item .tab-icon { font-size: 1.2rem; line-height: 1; }
 
     @media (max-width: 768px) {
+      body { flex-direction: column; }
       .sidebar { display: none; }
-      .main { margin-left: 0; padding: 16px 16px 80px; }
+      .main { margin-left: 0; padding: 16px 16px 80px; flex: 1; }
       .mobile-topbar { display: flex; }
       .bottom-tabs { display: block; }
       .two-col { grid-template-columns: 1fr; }
